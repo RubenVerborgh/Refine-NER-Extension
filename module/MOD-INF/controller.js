@@ -18,6 +18,7 @@ function init() {
   resourceManager.addPaths(
     "project/scripts",
     module, [
+      "dialogs/about.js",
       "dialogs/configuration.js",
       "scripts/menus.js",
     ]
@@ -26,6 +27,7 @@ function init() {
     "project/styles",
     module, [
       "styles/main.less",
+      "dialogs/about.less",
       "dialogs/configuration.less",
     ]
   );

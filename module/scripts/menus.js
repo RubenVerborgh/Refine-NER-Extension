@@ -3,7 +3,7 @@ var NerExtension = {};
 /* Menu handlers */
 NerExtension.handlers = {
   about: function () {
-    alert("Named-Entity Recognition Extension\n\nhttp://freeyourmetadata.org/");
+    new AboutDialog().show();
   },
   configure: function () {
     new ConfigurationDialog().show();
