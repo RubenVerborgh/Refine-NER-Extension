@@ -10,8 +10,6 @@ function init() {
   logger.info("Initializing service manager");
   var cacheFolder = new refineServlet().getCacheDir("ner-extension");
   var serviceManager = new services.NERServiceManager(new File(cacheFolder + "/services.json"));
-  serviceManager.addService(new services.Zemanta());
-  serviceManager.addService(new services.DummyNER());
   
   logger.info("Initializing commands");
   register("services", new commands.ServicesCommand(serviceManager));

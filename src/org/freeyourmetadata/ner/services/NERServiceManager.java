@@ -1,6 +1,7 @@
 package org.freeyourmetadata.ner.services;
 
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
@@ -9,6 +10,7 @@ import java.util.Iterator;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONTokener;
 import org.json.JSONWriter;
 
 import com.google.refine.util.JSONUtilities;
@@ -17,10 +19,16 @@ public class NERServiceManager {
     private final HashMap<String, NERService> services;
     private final File settingsFile;
     
-    public NERServiceManager(File settingsFile) {
+    public NERServiceManager(File settingsFile) throws IOException, JSONException {
         this.settingsFile = settingsFile;
-        System.err.println(this.settingsFile.toString());
         services = new HashMap<String, NERService>();
+        addService(new Zemanta());
+        addService(new DummyNER());
+        
+        if (settingsFile.exists()) {
+            JSONTokener tokener = new JSONTokener(new FileReader(settingsFile));
+            updateFrom((JSONArray)tokener.nextValue());
+        }
     }
     
     public void addService(NERService service) {
