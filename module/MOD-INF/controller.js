@@ -19,6 +19,7 @@ function init() {
   resourceManager.addPaths(
     "project/scripts",
     module, [
+      "scripts/config.js",
       "dialogs/about.js",
       "dialogs/configuration.js",
       "dialogs/extraction.js",
