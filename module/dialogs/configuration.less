@@ -1,3 +1,36 @@
 .dialog-frame.ner-configuration {
-  max-width: 800px;
+  max-width: 500px;
+  
+  .dialog-body {
+    overflow-y: auto;
+    max-height: 300px;
+  }
+  
+  fieldset {
+    margin: .5em 10px;
+    
+    ol {
+      list-style: none;
+      padding: 1px 10px;
+    }
+    li {
+      margin: .5em 0;
+      clear: both;
+    }
+    
+    label {
+      margin: 1px 10px 0 0;
+      width: 70px;
+      float: left;
+    }
+    
+    input {
+      margin: 0;
+      width: 300px;
+    }
+  }
+  
+  legend {
+    font-weight: bold;
+  }
 }

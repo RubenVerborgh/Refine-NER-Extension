@@ -5,6 +5,22 @@ ConfigurationDialog.prototype = {
     this.dialogElement = $(DOM.loadHTML("named-entity-recognition", "dialogs/configuration.html"));
     var controls = DOM.bind(this.dialogElement);
     controls.cancel.click(this.bound("hide"));
+    
+    $.getJSON(NERExtension.commandPath + "services", function (services) {
+      var $services = $(controls.services);
+      services.forEach(function (service) {
+        var settings = service.settings,
+            $service = $('<fieldset/>').append($('<legend/>').text(service.name)),
+            $settings = $('<ol>').appendTo($service);
+        for(var settingName in settings) {
+          var id = encodeURIComponent(service.name + '-' + settingName);
+          $settings.append($('<li>')
+              .append($('<label>', { 'for': id, text: settingName }),
+                      $('<input>', { id: id, value: settings[settingName] })));
+        }
+        $services.append($service);
+      });
+    });
   },
   
   show: function () {
