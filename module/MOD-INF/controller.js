@@ -1,21 +1,34 @@
-var Logger = Packages.org.slf4j.LoggerFactory.getLogger("NER-extension");
+var logger = Packages.org.slf4j.LoggerFactory.getLogger("NER-extension"),
+    refineServlet = Packages.com.google.refine.RefineServlet,
+    ner = Packages.org.freeyourmetadata.ner,
+    services = ner.services,
+    commands = ner.commands;
 
 /* Initialize the extension. */
 function init() {
-  var ClientSideResourceManager = Packages.com.google.refine.ClientSideResourceManager;
-  Logger.info("Initializing client resources");
-
-  ClientSideResourceManager.addPaths(
+  logger.info("Initializing service manager");
+  var serviceManager = new services.NERServiceManager();
+  serviceManager.addService(new services.Zemanta());
+  
+  logger.info("Initializing commands");
+  register("services", new commands.GetServices(serviceManager));
+  
+  logger.info("Initializing client resources");
+  var resourceManager = Packages.com.google.refine.ClientSideResourceManager;
+  resourceManager.addPaths(
     "project/scripts",
     module, [
       "scripts/menus.js",
     ]
   );
-
-  ClientSideResourceManager.addPaths(
+  resourceManager.addPaths(
     "project/styles",
     module, [
       "styles/main.less",
     ]
   );
+}
+
+function register(path, command) {
+  refineServlet.registerCommand(module, path, command);
 }
