@@ -6,7 +6,7 @@ NerExtension.handlers = {
     alert("Named-Entity Recognition Extension\n\nhttp://freeyourmetadata.org/");
   },
   configure: function () {
-    alert("Configure Named-Entity Recognition Extension");
+    new ConfigurationDialog().show();
   },
   extractEntities: function (column) {
     alert("Extract entities in column " + column.name + ".");
