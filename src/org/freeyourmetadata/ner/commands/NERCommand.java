@@ -11,12 +11,16 @@ import org.json.JSONWriter;
 
 import com.google.refine.commands.Command;
 
+/**
+ * Base class for JSON-based commands
+ * @author Ruben Verborgh
+ */
 public abstract class NERCommand extends Command {
+    /** {@inheritDoc} */
     @Override
-    public void doGet(HttpServletRequest request, HttpServletResponse response)
+    public void doGet(final HttpServletRequest request, final HttpServletResponse response)
             throws ServletException, IOException {
-        response.setHeader("Content-Type", "application/json");
-        JSONWriter writer = new JSONWriter(response.getWriter());
+        final JSONWriter writer = createResponseWriter(response);
         try {
             get(request, writer);
         }
@@ -26,12 +30,12 @@ public abstract class NERCommand extends Command {
         }
     }
     
+    /** {@inheritDoc} */
     @Override
-    public void doPut(HttpServletRequest request, HttpServletResponse response)
+    public void doPut(final HttpServletRequest request, final HttpServletResponse response)
             throws ServletException, IOException {
-        response.setHeader("Content-Type", "application/json");
-        JSONWriter writer = new JSONWriter(response.getWriter());
-        JSONTokener tokener = new JSONTokener(request.getReader());
+        final JSONWriter writer = createResponseWriter(response);
+        final JSONTokener tokener = new JSONTokener(request.getReader());
         try {
             put(request, tokener.nextValue(), writer);
         }
@@ -40,7 +44,32 @@ public abstract class NERCommand extends Command {
             throw new ServletException(error);
         }
     }
+
+    /**
+     * Creates a JSON response writer and sets the content-type accordingly
+     * @param response The response
+     * @return The response writer
+     * @throws IOException
+     */
+    protected JSONWriter createResponseWriter(final HttpServletResponse response) throws IOException {
+        response.setHeader("Content-Type", "application/json");
+        return new JSONWriter(response.getWriter());
+    }
     
-    public void get(HttpServletRequest request, JSONWriter response) throws Exception {}
-    public void put(HttpServletRequest request, Object body, JSONWriter response) throws Exception {}
+    /**
+     * Handles a <tt>GET</tt> request
+     * @param request The request
+     * @param response The response writer
+     * @throws Exception if something goes wrong
+     */
+    public void get(final HttpServletRequest request, final JSONWriter response) throws Exception {}
+    
+    /**
+     * Handles a <tt>PUT</tt> request
+     * @param request The request
+     * @param body The parsed JSON object from the request body
+     * @param response The response writer
+     * @throws Exception if something goes wrong
+     */
+    public void put(final HttpServletRequest request, final Object body, final JSONWriter response) throws Exception {}
 }
