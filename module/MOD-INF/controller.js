@@ -20,6 +20,7 @@ function init() {
     module, [
       "dialogs/about.js",
       "dialogs/configuration.js",
+      "dialogs/extraction.js",
       "scripts/menus.js",
     ]
   );
@@ -29,6 +30,7 @@ function init() {
       "styles/main.less",
       "dialogs/about.less",
       "dialogs/configuration.less",
+      "dialogs/extraction.less",
     ]
   );
 }

@@ -9,7 +9,7 @@ NerExtension.handlers = {
     new ConfigurationDialog().show();
   },
   extractEntities: function (column) {
-    alert("Extract entities in column " + column.name + ".");
+    new ExtractionDialog(column).show();
   },
 };
 
