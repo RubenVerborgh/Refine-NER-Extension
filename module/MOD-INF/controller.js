@@ -12,7 +12,7 @@ function init() {
   serviceManager.addService(new services.DummyNER());
   
   logger.info("Initializing commands");
-  register("services", new commands.GetServices(serviceManager));
+  register("services", new commands.ServicesCommand(serviceManager));
   
   logger.info("Initializing client resources");
   var resourceManager = Packages.com.google.refine.ClientSideResourceManager;

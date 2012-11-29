@@ -14,6 +14,8 @@ public class NERServiceManager {
     }
     
     public NERService getService(String name) {
+        if (!services.containsKey(name))
+            throw new IllegalArgumentException("No service named " + name + " exists.");
         return services.get(name);
     }
     
