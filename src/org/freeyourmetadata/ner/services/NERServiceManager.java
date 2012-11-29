@@ -1,5 +1,8 @@
 package org.freeyourmetadata.ner.services;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -12,8 +15,11 @@ import com.google.refine.util.JSONUtilities;
 
 public class NERServiceManager {
     private final HashMap<String, NERService> services;
+    private final File settingsFile;
     
-    public NERServiceManager() {
+    public NERServiceManager(File settingsFile) {
+        this.settingsFile = settingsFile;
+        System.err.println(this.settingsFile.toString());
         services = new HashMap<String, NERService>();
     }
     
@@ -29,6 +35,12 @@ public class NERServiceManager {
     
     public NERService[] getServices() {
         return services.values().toArray(new NERService[services.size()]);
+    }
+    
+    public void save() throws JSONException, IOException {
+        final FileWriter writer = new FileWriter(settingsFile);
+        writeTo(new JSONWriter(writer));
+        writer.close();
     }
     
     public void writeTo(JSONWriter output) throws JSONException {

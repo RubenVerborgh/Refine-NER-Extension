@@ -1,4 +1,5 @@
 var logger = Packages.org.slf4j.LoggerFactory.getLogger("NER-extension"),
+    File = Packages.java.io.File,
     refineServlet = Packages.com.google.refine.RefineServlet,
     ner = Packages.org.freeyourmetadata.ner,
     services = ner.services,
@@ -7,7 +8,8 @@ var logger = Packages.org.slf4j.LoggerFactory.getLogger("NER-extension"),
 /* Initialize the extension. */
 function init() {
   logger.info("Initializing service manager");
-  var serviceManager = new services.NERServiceManager();
+  var cacheFolder = new refineServlet().getCacheDir("ner-extension");
+  var serviceManager = new services.NERServiceManager(new File(cacheFolder + "/services.json"));
   serviceManager.addService(new services.Zemanta());
   serviceManager.addService(new services.DummyNER());
   

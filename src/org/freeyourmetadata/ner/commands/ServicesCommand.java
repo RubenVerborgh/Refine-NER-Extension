@@ -23,5 +23,6 @@ public class ServicesCommand extends NERCommand {
         if(!(body instanceof JSONArray))
             throw new IllegalArgumentException("Body should be a JSON array.");
         serviceManager.updateFrom((JSONArray)body);
+        serviceManager.save();
     }
 }
