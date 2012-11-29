@@ -1,7 +1,8 @@
 function ConfigurationDialog() {}
 
 ConfigurationDialog.prototype = {
-  init: function () {
+  init: function (callback) {
+    var self = this;
     this.dialogElement = $(DOM.loadHTML("named-entity-recognition", "dialogs/configuration.html"));
     var controls = DOM.bind(this.dialogElement);
     controls.cancel.click(this.bound("hide"));
@@ -20,12 +21,15 @@ ConfigurationDialog.prototype = {
         }
         $services.append($service);
       });
+      if (callback)
+        callback.apply(self);
     });
   },
   
   show: function () {
-    this.init();
-    this.dialogLevel = DialogSystem.showDialog(this.dialogElement);
+    this.init(function () {
+      this.dialogLevel = DialogSystem.showDialog(this.dialogElement);
+    });
   },
   
   hide: function () {
