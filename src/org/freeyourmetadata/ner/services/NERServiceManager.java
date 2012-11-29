@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -23,10 +25,11 @@ public class NERServiceManager {
         this.settingsFile = settingsFile;
         services = new HashMap<String, NERService>();
         
-        if (settingsFile.exists()) {
-            JSONTokener tokener = new JSONTokener(new FileReader(settingsFile));
-            updateFrom((JSONArray)tokener.nextValue());
-        }
+        final Reader settingsReader = settingsFile.exists() ? new FileReader(settingsFile)
+                                      : new InputStreamReader(getClass().getResourceAsStream("DefaultServices.json"));
+        final JSONTokener tokener = new JSONTokener(settingsReader);
+        updateFrom((JSONArray)tokener.nextValue());
+        settingsReader.close();
     }
     
     public boolean hasService(final String serviceName) {
@@ -103,11 +106,13 @@ public class NERServiceManager {
                 throw new IllegalArgumentException("Value should be an array of JSON objects.");
             final JSONObject serviceValue = (JSONObject)value;
             final NERService service = getOrCreateService(serviceValue.getString("name"), serviceValue.getString("class"));
-            final JSONObject settings = serviceValue.getJSONObject("settings");
-            final Iterator<String> settingNames = settings.keys();
-            while (settingNames.hasNext()) {
-                final String settingName = settingNames.next();
-                service.setProperty(settingName, settings.getString(settingName));
+            if (serviceValue.has("settings")) {
+                final JSONObject settings = serviceValue.getJSONObject("settings");
+                final Iterator<String> settingNames = settings.keys();
+                while (settingNames.hasNext()) {
+                    final String settingName = settingNames.next();
+                    service.setProperty(settingName, settings.getString(settingName));
+                }
             }
         }
     }

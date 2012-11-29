@@ -1,0 +1,4 @@
+[
+    {"name": "Zemanta",        "class": "org.freeyourmetadata.ner.services.Zemanta"},
+    {"name": "DummyNER",       "class": "org.freeyourmetadata.ner.services.DummyNER"}
+]
