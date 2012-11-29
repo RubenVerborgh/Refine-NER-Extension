@@ -9,6 +9,7 @@ function init() {
   logger.info("Initializing service manager");
   var serviceManager = new services.NERServiceManager();
   serviceManager.addService(new services.Zemanta());
+  serviceManager.addService(new services.DummyNER());
   
   logger.info("Initializing commands");
   register("services", new commands.GetServices(serviceManager));
