@@ -15,10 +15,4 @@ AboutDialog.prototype = {
   hide: function () {
     DialogSystem.dismissUntil(this.dialogLevel - 1);
   },
-  
-  // via: http://webreflection.blogspot.be/2012/11/my-name-is-bound-method-bound.html
-  bound: function (methodName) {
-    var boundName = "__bound__" + methodName;
-    return this[boundName] || (this[boundName] = this[methodName].bind(this));
-  },
 };

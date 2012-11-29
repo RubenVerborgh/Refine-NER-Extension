@@ -20,6 +20,7 @@ function init() {
     "project/scripts",
     module, [
       "scripts/config.js",
+      "scripts/util.js",
       "dialogs/about.js",
       "dialogs/configuration.js",
       "dialogs/extraction.js",
