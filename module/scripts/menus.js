@@ -1,18 +1,3 @@
-var NerExtension = {};
-
-/* Menu handlers */
-NerExtension.handlers = {
-  about: function () {
-    new AboutDialog().show();
-  },
-  configure: function () {
-    new ConfigurationDialog().show();
-  },
-  extractEntities: function (column) {
-    new ExtractionDialog(column).show();
-  },
-};
-
 /* Add menu to extension bar */
 ExtensionBar.addExtensionMenu({
   id: "named-entity-recognition",
@@ -21,13 +6,13 @@ ExtensionBar.addExtensionMenu({
     {
       id   : "named-entity-recognition/configuration",
       label: "Configure API keys…",
-      click: NerExtension.handlers.configure,
+      click: dialogHandler(ConfigurationDialog),
     },
     { /* separator */ },
     {
       id   : "named-entity-recognition/about",
       label: "About…",
-      click: NerExtension.handlers.about,
+      click: dialogHandler(AboutDialog),
     },
   ]
 });
@@ -39,7 +24,14 @@ DataTableColumnHeaderUI.extendMenu(function (column, columnHeaderUI, menu) {
     {
       id: "named-entity-recognition/extract",
       label: "Extract named entities…",
-      click: function () { NerExtension.handlers.extractEntities(column); },
+      click: dialogHandler(ExtractionDialog, column),
     },
   ]);
 });
+
+function dialogHandler(dialogConstructor) {
+  var dialogArguments = Array.prototype.slice.call(arguments, 1);
+  function Dialog() { return dialogConstructor.apply(this, dialogArguments); }
+  Dialog.prototype = dialogConstructor.prototype;
+  return function () { new Dialog().show(); };
+}
