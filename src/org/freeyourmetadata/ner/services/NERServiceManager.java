@@ -55,10 +55,11 @@ public class NERServiceManager {
     
     /**
      * Adds the service to the manager
+     * @param name The name of the service
      * @param service The service
      */
-    public void addService(final NERService service) {
-        services.put(service.getName(), service);
+    public void addService(final String name, final NERService service) {
+        services.put(name, service);
     }
     
     /**
@@ -97,17 +98,17 @@ public class NERServiceManager {
             catch (IllegalAccessException error) { throw new RuntimeException(error); }
             
             // Add the newly created service
-            addService(service);
+            addService(serviceName, service);
         }
         return service;
     }
     
     /**
-     * Gets all services in the manager
-     * @return The services
+     * Gets the names of all services in the manager
+     * @return The services names
      */
-    public NERService[] getServices() {
-        return services.values().toArray(new NERService[services.size()]);
+    public String[] getServiceNames() {
+        return services.keySet().toArray(new String[services.size()]);
     }
     
     /**
@@ -128,19 +129,20 @@ public class NERServiceManager {
         try {
             /* Array of services */
             output.array();
-            for (NERService service : getServices()) {
+            for (final String serviceName : getServiceNames()) {
+                final NERService service = getService(serviceName);
                 /* Service object */
                 output.object();
                 {
                     output.key("name");
-                    output.value(service.getName());
+                    output.value(serviceName);
                     output.key("class");
                     output.value(service.getClass().getName());
                     
                     /* Service settings object */
                     output.key("settings");
                     output.object();
-                    for(String propertyName : service.getPropertyNames()) {
+                    for(final String propertyName : service.getPropertyNames()) {
                         output.key(propertyName);
                         output.value(service.getProperty(propertyName));
                     }
@@ -163,7 +165,7 @@ public class NERServiceManager {
     public void updateFrom(final JSONArray serviceValues) throws JSONException, ClassNotFoundException {
         /* Array of services */
         final Object[] services = JSONUtilities.toArray((JSONArray)serviceValues);
-        for (Object value : services) {
+        for (final Object value : services) {
             /* Service object */
             if (!(value instanceof JSONObject))
                 throw new IllegalArgumentException("Value should be an array of JSON objects.");

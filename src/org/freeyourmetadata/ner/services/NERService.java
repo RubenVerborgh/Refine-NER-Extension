@@ -6,12 +6,6 @@ package org.freeyourmetadata.ner.services;
  */
 public interface NERService {
     /**
-     * Gets the name of the service
-     * @return The name
-     */
-    public String getName();
-    
-    /**
      * Gets the names of supported properties of the service
      * @return The property names
      */

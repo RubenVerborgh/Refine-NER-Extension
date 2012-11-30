@@ -11,7 +11,7 @@ public class DummyNER extends NERServiceBase {
      * Create a new DummyNER service connector
      */
     public DummyNER() {
-        super("DummyNER", PROPERTYNAMES);
+        super(PROPERTYNAMES);
         setProperty("API user", "ABCDEFGHIJKL");
         setProperty("API key",  "KLMNOPQRSTUV");
     }

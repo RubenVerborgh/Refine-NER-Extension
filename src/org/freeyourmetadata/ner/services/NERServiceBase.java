@@ -7,17 +7,14 @@ import java.util.HashMap;
  * @author Ruben Verborgh
  */
 public abstract class NERServiceBase implements NERService {
-    private final String name;
     private final String[] propertyNames;
     private final HashMap<String, String> properties;
     
     /**
      * Creates a new named-entity recognition service base class
-     * @param name The name of the service
      * @param propertyNames The names of supported properties
      */
-    public NERServiceBase(final String name, final String[] propertyNames) {
-        this.name = name;
+    public NERServiceBase(final String[] propertyNames) {
         this.propertyNames = propertyNames;
         
         properties = new HashMap<String, String>(propertyNames.length);
@@ -25,12 +22,6 @@ public abstract class NERServiceBase implements NERService {
             this.properties.put(propertyName, "");
     }
     
-    /** {@inheritDoc} */
-    @Override
-    public String getName() {
-        return name;
-    }
-
     /** {@inheritDoc} */
     @Override
     public String[] getPropertyNames() {
@@ -48,7 +39,7 @@ public abstract class NERServiceBase implements NERService {
     public void setProperty(final String name, final String value) {
         if (!properties.containsKey(name))
             throw new IllegalArgumentException("The property " + name
-                                               + " is invalid for " + this.getName() + ".");
+                                               + " is invalid for " + getClass().getName() + ".");
         properties.put(name, value == null ? "" : value);
     }
 }

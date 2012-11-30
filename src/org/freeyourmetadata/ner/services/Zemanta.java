@@ -11,6 +11,6 @@ public class Zemanta extends NERServiceBase {
      * Creates a new Zemanta service connector
      */
     public Zemanta() {
-        super("Zemanta", PROPERTYNAMES);
+        super(PROPERTYNAMES);
     }
 }
