@@ -18,14 +18,14 @@ ConfigurationDialog.prototype = {
         var settings = service.settings,
             $service = $('<fieldset/>').append($('<legend/>').text(service.name)),
             $settings = $('<ol>').appendTo($service);
-        for(var settingName in settings) {
+        Object.keys(settings).forEach(function (settingName) {
           var id = encodeURIComponent(service.name + '-' + settingName);
           $settings.append($('<li>')
               .append($('<label>', { 'for': id, text: settingName }),
                       $('<input>', { id: id, value: settings[settingName],
                                      change: function (event) { settings[settingName] = $(event.target).val(); },
                                    })));
-        }
+        });
         $services.append($service);
       });
       if (callback)
