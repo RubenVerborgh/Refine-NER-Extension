@@ -1,6 +1,8 @@
 package org.freeyourmetadata.ner.operations;
 
 import java.io.IOException;
+import java.io.LineNumberReader;
+import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.Collections;
 import java.util.List;
@@ -11,6 +13,7 @@ import com.google.refine.model.Project;
 import com.google.refine.model.changes.CellAtRow;
 import com.google.refine.model.changes.ColumnAdditionChange;
 import com.google.refine.model.changes.ColumnRemovalChange;
+import com.google.refine.util.Pool;
 
 /**
  * A change resulting from named-entity recognition
@@ -47,7 +50,28 @@ public class NERChange implements Change {
 
     /** {@inheritDoc} */
     @Override
-    public void save(final Writer writer, final Properties options) throws IOException { }
+    public void save(final Writer writer, final Properties options) throws IOException {
+        final PrintWriter output = new PrintWriter(writer);
+        output.println(columnIndex);
+        output.println(serviceNames.length);
+        for (final String serviceName : serviceNames)
+            output.println(serviceName);
+    }
+    
+    /**
+     * Create a <tt>NERChange</tt> from a configuration reader
+     * @param reader The reader
+     * @param pool (unused but required, since this method is called using reflection)
+     * @return A new <tt>NERChange</tt>
+     * @throws Exception If the configuration is in an unexpected format
+     */
+    static public Change load(LineNumberReader reader, Pool pool) throws Exception {
+        final int columnIndex = Integer.parseInt(reader.readLine());
+        final String[] serviceNames = new String[Integer.parseInt(reader.readLine())];
+        for (int i = 0; i < serviceNames.length; i++)
+            serviceNames[i] = reader.readLine();
+        return new NERChange(columnIndex, serviceNames, null);
+    }
     
     /**
      * Create the columns where the named entities will be stored
