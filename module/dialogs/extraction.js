@@ -14,6 +14,9 @@ ExtractionDialog.prototype = {
     /* Bind controls to actions */
     var controls = DOM.bind(this.dialogElement);
     controls.cancel.click(this.bound("hide"));
+    controls.start.click(function () {
+      self.extract(Object.keys(selectedServices).filter(function (s) { return selectedServices[s]; }));
+    });
     
     /* Load service checkboxes */
     $.getJSON(NERExtension.servicesPath, function (services) {
@@ -23,6 +26,7 @@ ExtractionDialog.prototype = {
                           type: 'checkbox',
                           change: function (event) {
                             selectedServices[service.name] = $(event.target).is(':checked');
+                            updateStartStatus();
                           }}),
             $label = $('<label/>', { 'class': 'checkbox' })
                         .append($service, service.name);
@@ -31,6 +35,12 @@ ExtractionDialog.prototype = {
       if (callback)
         callback.apply(self);
     });
+    
+    /* Enables or disables the start button */
+    function updateStartStatus() {
+      var hasServices = Object.keys(selectedServices).some(function (s) { return selectedServices[s]; });
+      $(controls.start).attr('disabled', !hasServices);
+    }
   },
   
   show: function () {
@@ -42,4 +52,9 @@ ExtractionDialog.prototype = {
   hide: function () {
     DialogSystem.dismissUntil(this.dialogLevel - 1);
   },
+  
+  extract: function (services) {
+    alert("Extract with " + JSON.stringify(services));
+    this.hide();
+  }
 };
