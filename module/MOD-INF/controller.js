@@ -31,6 +31,7 @@ function init() {
     "project/styles",
     module, [
       "styles/main.less",
+      "dialogs/dialogs.less",
       "dialogs/about.less",
       "dialogs/configuration.less",
       "dialogs/extraction.less",
