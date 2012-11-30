@@ -13,6 +13,7 @@ function init() {
   
   logger.info("Initializing commands");
   register("services", new commands.ServicesCommand(serviceManager));
+  register("extractions", new commands.ExtractionCommand(serviceManager));
   
   logger.info("Initializing client resources");
   var resourceManager = Packages.com.google.refine.ClientSideResourceManager;

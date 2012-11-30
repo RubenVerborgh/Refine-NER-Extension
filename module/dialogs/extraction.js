@@ -54,7 +54,10 @@ ExtractionDialog.prototype = {
   },
   
   extract: function (services) {
-    alert("Extract with " + JSON.stringify(services));
+    Refine.postProcess("named-entity-recognition", "extractions",
+                       { column: this.column.name, services: services },
+                       {},
+                       { rowsChanged: true, modelsChanged: true });
     this.hide();
   }
 };
