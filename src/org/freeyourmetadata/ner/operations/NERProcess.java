@@ -55,7 +55,7 @@ public class NERProcess extends LongRunningProcess implements Runnable {
     }
 
     /**
-     * Performs named-entity extraction
+     * Performs named-entity extraction on all rows
      * @return The extracted terms per row and service
      */
     protected String[][][] performExtraction() {
@@ -65,6 +65,7 @@ public class NERProcess extends LongRunningProcess implements Runnable {
         int rowIndex = 0;
         while (!_canceled && rowIndex < rowCount) {
             _progress = rowIndex * 100 / rowCount;
+            results[rowIndex] = performExtraction(rowIndex);
             try {
                 Thread.sleep(100);
             }
@@ -72,6 +73,30 @@ public class NERProcess extends LongRunningProcess implements Runnable {
             rowIndex++;
         }
         return results;
+    }
+    
+    /**
+     * Performs named-entity extraction on the specified row.
+     * @param rowIndex The index of the row
+     * @return The extracted terms per service
+     */
+    protected String[][] performExtraction(int rowIndex) {
+        final String[][] extractions = new String[services.size()][];
+        int index = 0;
+        for(final NERService service : services.values())
+            extractions[index++] = performExtraction(rowIndex, service);
+        return extractions;
+    }
+    
+    /**
+     * Performs named-entity extraction on the row with the specified service.
+     * @param rowIndex The index of the row
+     * @param service The service
+     * @return The extracted terms
+     */
+    protected String[] performExtraction(int rowIndex, NERService service) {
+        return new String[]{ service.getClass().getSimpleName() + rowIndex + "A",
+                             service.getClass().getSimpleName() + rowIndex + "B" };
     }
 
     /** {@inheritDoc} */
