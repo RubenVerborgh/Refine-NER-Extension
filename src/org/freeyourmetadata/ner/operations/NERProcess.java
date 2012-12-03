@@ -3,6 +3,7 @@ package org.freeyourmetadata.ner.operations;
 import java.io.Serializable;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
 import org.freeyourmetadata.ner.services.NERService;
 
 import com.google.refine.history.HistoryEntry;
@@ -19,6 +20,8 @@ import com.google.refine.process.LongRunningProcess;
  * @author Ruben Verborgh
  */
 public class NERProcess extends LongRunningProcess implements Runnable {
+    private final static Logger LOGGER = Logger.getLogger(NERProcess.class);
+    
     private final Project project;
     private final Column column;
     private final Map<String, NERService> services;
@@ -71,6 +74,8 @@ public class NERProcess extends LongRunningProcess implements Runnable {
             final Cell cell = row.getCell(cellIndex);
             final Serializable cellValue = cell == null ? null : cell.value;
             final String text = cellValue == null ? "" : cellValue.toString();
+            LOGGER.info(String.format("Extracting named entities in column %s on row %d of %d.",
+                                      column.getName(), rowIndex, rowCount));
             results[rowIndex++] = performExtraction(text);
             
             _progress = rowIndex * 100 / rowCount;
