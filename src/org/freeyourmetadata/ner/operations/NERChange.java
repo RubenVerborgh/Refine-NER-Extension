@@ -91,7 +91,7 @@ public class NERChange implements Change {
                     for (final NamedEntity[] entities : row) {
                         json.array();
                         for (final NamedEntity entity : entities)
-                            json.value(entity.getLabel());
+                            entity.writeTo(json);
                         json.endArray();
                     }
                     json.endArray();
@@ -142,7 +142,7 @@ public class NERChange implements Change {
                 final JSONArray entitiesJson = serviceResultsJson.getJSONArray(j);
                 final NamedEntity[] entities = serviceResults[j] = new NamedEntity[serviceResultsJson.length()];
                 for (int k = 0; k < entities.length; k++)
-                    entities[k] = new NamedEntity(entitiesJson.getString(k));
+                    entities[k] = new NamedEntity(entitiesJson.getJSONObject(k));
             }
         }
         
