@@ -33,6 +33,15 @@ public class NamedEntity {
     }
     
     /**
+     * Creates a new named entity with a single URI
+     * @param label The label of the entity
+     * @param uri The URI of the entity
+     */
+    public NamedEntity(final String label, final URI uri) {
+        this(label, new URI[]{ uri });
+    }
+    
+    /**
      * Creates a new named entity
      * @param label The label of the entity
      * @param uris The URIs of the entity

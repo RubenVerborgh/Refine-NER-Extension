@@ -52,11 +52,12 @@ public class Zemanta extends NERServiceBase {
             // In each link, find the targets
             final JSONObject link = links.getJSONObject(i);
             final JSONArray targets = link.getJSONArray("target");
-            // Use the target URLs as results
-            for (int j = 0; j < targets.length(); j++) {
-                final JSONObject target = targets.getJSONObject(j);
-                results.add(new NamedEntity(target.getString("url")));
-            }
+            final String label = targets.getJSONObject(0).getString("title");
+            final URI[] urls = new URI[targets.length()];
+            // Find all target URLs
+            for (int j = 0; j < targets.length(); j++)
+                urls[j] = createUri(targets.getJSONObject(j).getString("url"));
+            results.add(new NamedEntity(label, urls));
         }
         return results.toArray(new NamedEntity[results.size()]);
     }

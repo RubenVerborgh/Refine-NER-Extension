@@ -51,7 +51,8 @@ public class DBpediaLookup extends NERServiceBase {
         final NamedEntity[] results = new NamedEntity[resources.length()];
         for (int i = 0; i < resources.length(); i++) {
             final JSONObject resource = resources.getJSONObject(i);
-            results[i] = new NamedEntity(resource.getString("@URI"));
+            results[i] = new NamedEntity(resource.getString("@surfaceForm"),
+                                         createUri(resource.getString("@URI")));
         }
         return results;
     }
