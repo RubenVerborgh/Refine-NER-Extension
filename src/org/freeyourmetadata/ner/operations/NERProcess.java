@@ -1,13 +1,16 @@
 package org.freeyourmetadata.ner.operations;
 
+import java.io.Serializable;
 import java.util.Map;
 
 import org.freeyourmetadata.ner.services.NERService;
 
 import com.google.refine.history.HistoryEntry;
 import com.google.refine.model.AbstractOperation;
+import com.google.refine.model.Cell;
 import com.google.refine.model.Column;
 import com.google.refine.model.Project;
+import com.google.refine.model.Row;
 import com.google.refine.process.LongRunningProcess;
 
 /**
@@ -60,43 +63,34 @@ public class NERProcess extends LongRunningProcess implements Runnable {
      */
     protected String[][][] performExtraction() {
         final int rowCount = project.rows.size();
+        final int cellIndex = column.getCellIndex();
         final String[][][] results = new String[rowCount][][];
         
         int rowIndex = 0;
-        while (!_canceled && rowIndex < rowCount) {
+        for (final Row row : project.rows) {
+            final Cell cell = row.getCell(cellIndex);
+            final Serializable cellValue = cell == null ? null : cell.value;
+            final String text = cellValue == null ? "" : cellValue.toString();
+            results[rowIndex++] = performExtraction(text);
+            
             _progress = rowIndex * 100 / rowCount;
-            results[rowIndex] = performExtraction(rowIndex);
-            try {
-                Thread.sleep(100);
-            }
-            catch (InterruptedException e) {}
-            rowIndex++;
+            if (_canceled)
+                return null;
         }
         return results;
     }
     
     /**
-     * Performs named-entity extraction on the specified row.
-     * @param rowIndex The index of the row
+     * Performs named-entity extraction on the specified text.
+     * @param text The text
      * @return The extracted terms per service
      */
-    protected String[][] performExtraction(int rowIndex) {
+    protected String[][] performExtraction(final String text) {
         final String[][] extractions = new String[services.size()][];
         int index = 0;
         for(final NERService service : services.values())
-            extractions[index++] = performExtraction(rowIndex, service);
+            extractions[index++] = service.extractTerms(text);
         return extractions;
-    }
-    
-    /**
-     * Performs named-entity extraction on the row with the specified service.
-     * @param rowIndex The index of the row
-     * @param service The service
-     * @return The extracted terms
-     */
-    protected String[] performExtraction(int rowIndex, NERService service) {
-        return new String[]{ service.getClass().getSimpleName() + rowIndex + "A",
-                             service.getClass().getSimpleName() + rowIndex + "B" };
     }
 
     /** {@inheritDoc} */

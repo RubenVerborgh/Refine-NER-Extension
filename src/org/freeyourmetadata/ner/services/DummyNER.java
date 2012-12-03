@@ -15,4 +15,10 @@ public class DummyNER extends NERServiceBase {
         setProperty("API user", "ABCDEFGHIJKL");
         setProperty("API key",  "KLMNOPQRSTUV");
     }
+    
+    /** {@inheritDoc} */
+    @Override
+    public String[] extractTerms(final String text) {
+        return new String[]{ "Dummy Term A", "Dummy Term B" };
+    }
 }
