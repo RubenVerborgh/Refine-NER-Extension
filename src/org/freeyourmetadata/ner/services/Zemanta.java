@@ -37,7 +37,7 @@ public class Zemanta extends NERServiceBase {
     
     /** {@inheritDoc} */
     @Override
-    protected String[] parseExtractionResponseEntity(final JSONTokener tokener) throws JSONException {
+    protected NamedEntity[] parseExtractionResponseEntity(final JSONTokener tokener) throws JSONException {
         // Check response status
         final JSONObject response = (JSONObject)tokener.nextValue();
         if (!"ok".equals(response.getString("status")))
@@ -45,7 +45,7 @@ public class Zemanta extends NERServiceBase {
         
         // Get mark-up results
         final JSONObject markup = response.getJSONObject("markup");
-        final ArrayList<String> results = new ArrayList<String>();
+        final ArrayList<NamedEntity> results = new ArrayList<NamedEntity>();
         // In the mark-up results, find the links
         final JSONArray links = markup.getJSONArray("links");
         for (int i = 0; i < links.length(); i++) {
@@ -55,9 +55,9 @@ public class Zemanta extends NERServiceBase {
             // Use the target URLs as results
             for (int j = 0; j < targets.length(); j++) {
                 final JSONObject target = targets.getJSONObject(j);
-                results.add(target.getString("url"));
+                results.add(new NamedEntity(target.getString("url")));
             }
         }
-        return results.toArray(new String[results.size()]);
+        return results.toArray(new NamedEntity[results.size()]);
     }
 }

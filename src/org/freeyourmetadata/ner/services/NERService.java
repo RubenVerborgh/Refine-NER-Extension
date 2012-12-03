@@ -6,11 +6,11 @@ package org.freeyourmetadata.ner.services;
  */
 public interface NERService {
     /**
-     * Extracts the terms form the specified text
+     * Extracts named entities from the specified text
      * @param text The text
-     * @return The extracted terms
+     * @return The extracted named entities
      */
-    public String[] extractTerms(String text);
+    public NamedEntity[] extractNamedEntities(String text);
     
     /**
      * Gets the names of supported properties of the service

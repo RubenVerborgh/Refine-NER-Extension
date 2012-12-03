@@ -31,7 +31,7 @@ import com.google.common.base.Charsets;
  */
 public abstract class NERServiceBase implements NERService {
     private final static Logger LOGGER = Logger.getLogger(NERServiceBase.class);
-    private final static String[] EMPTY_EXTRACTION_RESULT = new String[0];
+    private final static NamedEntity[] EMPTY_EXTRACTION_RESULT = new NamedEntity[0];
     
     private final URI serviceUrl;
     private final String[] propertyNames;
@@ -82,13 +82,13 @@ public abstract class NERServiceBase implements NERService {
     
     /** {@inheritDoc} */
     @Override
-    public String[] extractTerms(final String text) {
+    public NamedEntity[] extractNamedEntities(final String text) {
         final HttpUriRequest request = createExtractionRequest(text);
         try {
             return performExtractionRequest(request);
         }
         catch (Exception error) {
-            LOGGER.debug("Error performing term extraction", error);
+            LOGGER.debug("Error performing named-entity extraction", error);
             return EMPTY_EXTRACTION_RESULT;
         }
     }
@@ -96,10 +96,10 @@ public abstract class NERServiceBase implements NERService {
     /**
      * Performs the named-entity recognition request
      * @param request The request
-     * @return The extracted terms
+     * @return The extracted named entities
      * @throws Exception if the request fails
      */
-    protected String[] performExtractionRequest(final HttpUriRequest request) throws Exception {
+    protected NamedEntity[] performExtractionRequest(final HttpUriRequest request) throws Exception {
         final DefaultHttpClient httpClient = new DefaultHttpClient();
         final HttpResponse response = httpClient.execute(request);
         final HttpEntity responseEntity = response.getEntity();
@@ -163,10 +163,10 @@ public abstract class NERServiceBase implements NERService {
     /**
      * Parses the entity of the named-entity recognition response
      * @param response A response of the named-entity extraction service
-     * @return The extracted terms
+     * @return The extracted named entities
      * @throws Exception if the response cannot be parsed
      */
-    protected String[] parseExtractionResponseEntity(HttpEntity response) throws Exception {
+    protected NamedEntity[] parseExtractionResponseEntity(HttpEntity response) throws Exception {
         final InputStreamReader responseReader = new InputStreamReader(response.getContent());
         return parseExtractionResponseEntity(new JSONTokener(responseReader));
     }
@@ -174,10 +174,10 @@ public abstract class NERServiceBase implements NERService {
     /**
      * Parses the JSON entity of the named-entity recognition response
      * @param tokener The tokener containing the response
-     * @return The extracted terms
+     * @return The extracted named entities
      * @throws JSONException if the response cannot be parsed
      */
-    protected String[] parseExtractionResponseEntity(final JSONTokener tokener) throws JSONException {
+    protected NamedEntity[] parseExtractionResponseEntity(final JSONTokener tokener) throws JSONException {
         return EMPTY_EXTRACTION_RESULT;
     }
     

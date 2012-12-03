@@ -45,13 +45,13 @@ public class DBpediaLookup extends NERServiceBase {
     
     /** {@inheritDoc} */
     @Override
-    protected String[] parseExtractionResponseEntity(final JSONTokener tokener) throws JSONException {
+    protected NamedEntity[] parseExtractionResponseEntity(final JSONTokener tokener) throws JSONException {
         final JSONObject response = (JSONObject)tokener.nextValue();
         final JSONArray resources = response.getJSONArray("Resources");
-        final String[] results = new String[resources.length()];
+        final NamedEntity[] results = new NamedEntity[resources.length()];
         for (int i = 0; i < resources.length(); i++) {
             final JSONObject resource = resources.getJSONObject(i);
-            results[i] = resource.getString("@URI");
+            results[i] = new NamedEntity(resource.getString("@URI"));
         }
         return results;
     }

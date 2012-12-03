@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Properties;
 
 import org.apache.commons.lang.ArrayUtils;
+import org.freeyourmetadata.ner.services.NamedEntity;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -33,19 +34,19 @@ import com.google.refine.util.Pool;
 public class NERChange implements Change {
     private final int columnIndex;
     private final String[] serviceNames;
-    private final String[][][] extractedTerms;
+    private final NamedEntity[][][] namedEntities;
     private final List<Integer> addedRowIds;
     
     /**
      * Creates a new <tt>NERChange</tt>
      * @param columnIndex The index of the column used for named-entity recognition
      * @param serviceNames The names of the used services
-     * @param extractedTerms The extracted terms per row and service
+     * @param namedEntities The extracted named entities per row and service
      */
-    public NERChange(final int columnIndex, final String[] serviceNames, final String[][][] extractedTerms) {
+    public NERChange(final int columnIndex, final String[] serviceNames, final NamedEntity[][][] namedEntities) {
         this.columnIndex = columnIndex;
         this.serviceNames = serviceNames;
-        this.extractedTerms = extractedTerms;
+        this.namedEntities = namedEntities;
         this.addedRowIds = new ArrayList<Integer>();
     }
 
@@ -78,17 +79,21 @@ public class NERChange implements Change {
             json.object();
             json.key("column"); json.value(columnIndex);
             json.key("services"); JSONUtilities.writeStringArray(json, serviceNames);
-            json.key("terms");
-            /* Extracted terms nested array */
+            json.key("entities");
+            /* Named entities nested array */
             {
                 /* Rows array */
                 json.array();
-                for (final String[][] row : extractedTerms) {
+                for (final NamedEntity[][] row : namedEntities) {
                     /* Services array */
                     json.array();
                     /* Service results array */
-                    for (final String[] terms : row)
-                        JSONUtilities.writeStringArray(json, terms);
+                    for (final NamedEntity[] entities : row) {
+                        json.array();
+                        for (final NamedEntity entity : entities)
+                            json.value(entity.getLabel());
+                        json.endArray();
+                    }
                     json.endArray();
                 }
                 json.endArray();
@@ -124,25 +129,25 @@ public class NERChange implements Change {
         final int columnIndex = changeJson.getInt("column");
         final String[] serviceNames = JSONUtilities.getStringArray(changeJson, "services");
         
-        /* Extracted terms nested array */
-        final JSONArray extractedTermsJson = changeJson.getJSONArray("terms");
-        final String[][][] extractedTerms = new String[extractedTermsJson.length()][][];
+        /* Named entities nested array */
+        final JSONArray namedEntitiesJson = changeJson.getJSONArray("entities");
+        final NamedEntity[][][] namedEntities = new NamedEntity[namedEntitiesJson.length()][][];
         /* Rows array */
-        for (int i = 0; i < extractedTerms.length; i++) {
+        for (int i = 0; i < namedEntities.length; i++) {
             /* Services array */
-            final JSONArray servicesJson = extractedTermsJson.getJSONArray(i);
-            final String[][] services = extractedTerms[i] = new String[servicesJson.length()][];
-            for (int j = 0; j < services.length; j++) {
+            final JSONArray serviceResultsJson = namedEntitiesJson.getJSONArray(i);
+            final NamedEntity[][] serviceResults = namedEntities[i] = new NamedEntity[serviceResultsJson.length()][];
+            for (int j = 0; j < serviceResults.length; j++) {
                 /* Service results array */
-                final JSONArray termsJson = servicesJson.getJSONArray(j);
-                final String[] terms = services[j] = new String[termsJson.length()];
-                for (int k = 0; k < terms.length; k++)
-                    terms[k] = termsJson.getString(k);
+                final JSONArray entitiesJson = serviceResultsJson.getJSONArray(j);
+                final NamedEntity[] entities = serviceResults[j] = new NamedEntity[serviceResultsJson.length()];
+                for (int k = 0; k < entities.length; k++)
+                    entities[k] = new NamedEntity(entitiesJson.getString(k));
             }
         }
         
         /* Reconstruct change object */
-        final NERChange change = new NERChange(columnIndex, serviceNames, extractedTerms);
+        final NERChange change = new NERChange(columnIndex, serviceNames, namedEntities);
         for (final int addedRowId : JSONUtilities.getIntArray(changeJson, "addedRows"))
             change.addedRowIds.add(addedRowId);
         return change;
@@ -182,9 +187,9 @@ public class NERChange implements Change {
     }
 
     /**
-     * Insert the extracted terms into rows with the specified cell indexes
+     * Insert the extracted named entities into rows with the specified cell indexes
      * @param project The project
-     * @param cellIndexes The cell indexes of the rows that will contain the terms
+     * @param cellIndexes The cell indexes of the rows that will contain the named entities
      */
     protected void insertValues(final Project project, final int[] cellIndexes) {
         final List<Row> rows = project.rows;
@@ -199,39 +204,43 @@ public class NERChange implements Change {
             while (row.cells.size() < minRowSize)
                 row.cells.add(null);
         
-        // Add the extracted terms to all rows, creating new ones as necessary
+        // Add the extracted named entities to all rows, creating new ones as necessary
         int rowNumber = 0;
         addedRowIds.clear();
-        for (final String[][] serviceTerms : extractedTerms) {
-            // Determine the maximum number of terms per service
-            int maxTerms = 0;
-            for (final String[] terms : serviceTerms)
-                maxTerms = Math.max(maxTerms, terms.length);
-            // Skip this row if no terms were found
-            if (maxTerms == 0) {
+        for (final NamedEntity[][] serviceEntities : namedEntities) {
+            // Determine the maximum number of named entities per service
+            int maxEntities = 0;
+            for (final NamedEntity[] entities : serviceEntities)
+                maxEntities = Math.max(maxEntities, entities.length);
+            // Skip this row if no named entities were found
+            if (maxEntities == 0) {
                 rowNumber++;
                 continue;
             }
-            // Create new blank rows if terms don't fit on a single line
-            for (int i = 1; i < maxTerms; i++) {
-                final Row termRow = new Row(minRowSize);
-                final int termRowId = rowNumber + i;
+            // Create new blank rows if named entities don't fit on a single line
+            for (int i = 1; i < maxEntities; i++) {
+                final Row entityRow = new Row(minRowSize);
+                final int entityRowId = rowNumber + i;
                 for (int j = 0; j < minRowSize; j++)
-                    termRow.cells.add(null);
-                rows.add(termRowId, termRow);
-                addedRowIds.add(termRowId);
+                    entityRow.cells.add(null);
+                rows.add(entityRowId, entityRow);
+                addedRowIds.add(entityRowId);
             }
-            // Place all terms
-            for (int c = 0; c < serviceTerms.length; c++)
-                for (int r = 0; r < serviceTerms[c].length; r++)
-                    rows.get(rowNumber + r).cells.set(cellIndexes[c], new Cell(serviceTerms[c][r], null));
+            // Place all named entities
+            for (int c = 0; c < serviceEntities.length; c++) {
+                final NamedEntity[] entities = serviceEntities[c];
+                for (int r = 0; r < entities.length; r++) {
+                    final NamedEntity entity = entities[r];
+                    rows.get(rowNumber + r).cells.set(cellIndexes[c], new Cell(entity.getLabel(), null));
+                }
+            }
             // Advance to the next original row
-            rowNumber += maxTerms;
+            rowNumber += maxEntities;
         }
     }
     
     /**
-     * Delete rows that were added to contain extracted terms
+     * Delete rows that were added to contain extracted named entities
      * @param project The project
      */
     protected void deleteRows(final Project project) {

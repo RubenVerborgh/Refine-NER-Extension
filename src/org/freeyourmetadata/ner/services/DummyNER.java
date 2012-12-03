@@ -38,11 +38,11 @@ public class DummyNER extends NERServiceBase {
     
     /** {@inheritDoc} */
     @Override
-    protected String[] parseExtractionResponseEntity(final JSONTokener tokener) throws JSONException {
+    protected NamedEntity[] parseExtractionResponseEntity(final JSONTokener tokener) throws JSONException {
         final JSONArray resultsJson = (JSONArray)tokener.nextValue();
-        final String[] results = new String[resultsJson.length()];
+        final NamedEntity[] results = new NamedEntity[resultsJson.length()];
         for (int i = 0; i < results.length; i++)
-            results[i] = resultsJson.getString(i);
+            results[i] = new NamedEntity(resultsJson.getString(i));
         return results;
     }
 }
