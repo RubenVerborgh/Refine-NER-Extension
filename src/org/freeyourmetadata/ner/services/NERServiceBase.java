@@ -1,12 +1,37 @@
 package org.freeyourmetadata.ner.services;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.entity.InputStreamEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.log4j.Logger;
+import org.json.JSONException;
+import org.json.JSONTokener;
+import org.json.JSONWriter;
+
+import com.google.common.base.Charsets;
 
 /**
  * Abstract base class for named-entity recognition services
+ * with default support for JSON communication (but others are possible)
  * @author Ruben Verborgh
  */
 public abstract class NERServiceBase implements NERService {
+    private final static Logger LOGGER = Logger.getLogger(NERServiceBase.class);
+    private final static String[] EMPTY_EXTRACTION_RESULT = new String[0];
+    
+    private final URI serviceUrl;
     private final String[] propertyNames;
     private final HashMap<String, String> properties;
     
@@ -15,6 +40,16 @@ public abstract class NERServiceBase implements NERService {
      * @param propertyNames The names of supported properties
      */
     public NERServiceBase(final String[] propertyNames) {
+        this(null, propertyNames);
+    }
+    
+    /**
+     * Creates a new named-entity recognition service base class
+     * @param serviceUrl The URL of the service (can be null if not fixed)
+     * @param propertyNames The names of supported properties
+     */
+    public NERServiceBase(final URI serviceUrl, final String[] propertyNames) {
+        this.serviceUrl = serviceUrl;
         this.propertyNames = propertyNames;
         
         properties = new HashMap<String, String>(propertyNames.length);
@@ -41,5 +76,120 @@ public abstract class NERServiceBase implements NERService {
             throw new IllegalArgumentException("The property " + name
                                                + " is invalid for " + getClass().getName() + ".");
         properties.put(name, value == null ? "" : value);
+    }
+    
+    /** {@inheritDoc} */
+    @Override
+    public String[] extractTerms(final String text) {
+        final HttpUriRequest request = createExtractionRequest(text);
+        try {
+            return performExtractionRequest(request);
+        }
+        catch (Exception error) {
+            LOGGER.debug("Error performing term extraction", error);
+            return EMPTY_EXTRACTION_RESULT;
+        }
+    }
+    
+    /**
+     * Performs the named-entity recognition request
+     * @param request The request
+     * @return The extracted terms
+     * @throws Exception if the request fails
+     */
+    protected String[] performExtractionRequest(final HttpUriRequest request) throws Exception {
+        final DefaultHttpClient httpClient = new DefaultHttpClient();
+        final HttpResponse response = httpClient.execute(request);
+        final HttpEntity responseEntity = response.getEntity();
+        return parseExtractionResponseEntity(responseEntity);
+    }
+
+    /**
+     * Creates a named-entity recognition request on the specified text
+     * @param text The text to analyze
+     * @return The created request
+     */
+    protected HttpUriRequest createExtractionRequest(final String text) {
+        final URI requestUrl = createExtractionRequestUrl(text);
+        final HttpEntity body = createExtractionRequestBody(text);
+        final HttpPost request = new HttpPost(requestUrl);
+        request.setEntity(body);
+        return request;
+    }
+    
+    /**
+     * Creates the URL for a named-entity recognition request on the specified text
+     * @param text The text to analyze
+     * @return The created URL
+     */
+    protected URI createExtractionRequestUrl(final String text) {
+        return serviceUrl;
+    }
+
+    /**
+     * Creates the body for a named-entity recognition request on the specified text
+     * @param text The text to analyze
+     * @return The created body entity
+     */
+    protected HttpEntity createExtractionRequestBody(final String text) {
+        final ByteArrayOutputStream bodyOutput = new ByteArrayOutputStream();
+        final JSONWriter bodyWriter = new JSONWriter(new OutputStreamWriter(bodyOutput, Charsets.UTF_8));
+        try {
+            writeExtractionRequestBody(text, bodyWriter);
+        }
+        catch (JSONException error) {
+            throw new RuntimeException(error);
+        }
+        try {
+            bodyOutput.close();
+        }
+        catch (IOException e) { }
+        final byte[] bodyBytes = bodyOutput.toByteArray();
+        final ByteArrayInputStream bodyInput = new ByteArrayInputStream(bodyBytes);
+        final HttpEntity body = new InputStreamEntity(bodyInput, bodyBytes.length);
+        return body;
+    }
+    
+    /**
+     * Writes the body JSON for a named-entity recognition request on the specified text
+     * @param text The text to analyze
+     * @param body The body writer
+     * @throws JSONException if writing the body goes wrong
+     */
+    protected void writeExtractionRequestBody(final String text, final JSONWriter body) throws JSONException { }
+    
+    /**
+     * Parses the entity of the named-entity recognition response
+     * @param response A response of the named-entity extraction service
+     * @return The extracted terms
+     * @throws Exception if the response cannot be parsed
+     */
+    protected String[] parseExtractionResponseEntity(HttpEntity response) throws Exception {
+        final InputStreamReader responseReader = new InputStreamReader(response.getContent());
+        return parseExtractionResponseEntity(new JSONTokener(responseReader));
+    }
+    
+    /**
+     * Parses the JSON entity of the named-entity recognition response
+     * @param tokener The tokener containing the response
+     * @return The extracted terms
+     * @throws JSONException if the response cannot be parsed
+     */
+    protected String[] parseExtractionResponseEntity(final JSONTokener tokener) throws JSONException {
+        return EMPTY_EXTRACTION_RESULT;
+    }
+    
+    /**
+     * Creates a URI from the specified string without throwing a <tt>URISyntaxException</tt>.
+     * @param uri The URI in string format
+     * @return The URI
+     */
+    protected static URI createUri(String uri) {
+        try {
+            return new URI(uri);
+        }
+        catch (URISyntaxException e) {
+            return null;
+        }
     }
 }
