@@ -5,8 +5,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLEncoder;
 import java.util.HashMap;
 
 import org.apache.http.HttpEntity;
@@ -190,6 +192,20 @@ public abstract class NERServiceBase implements NERService {
         }
         catch (URISyntaxException e) {
             return null;
+        }
+    }
+    
+    /**
+     * Encodes the specified text for use in an URL.
+     * @param text The text to encode
+     * @return The encoded text
+     */
+    protected static String urlEncode(String text) {
+        try {
+            return URLEncoder.encode(text, "UTF-8");
+        }
+        catch (UnsupportedEncodingException error) {
+            throw new RuntimeException(error);
         }
     }
 }
