@@ -86,10 +86,24 @@ public class NERProcess extends LongRunningProcess implements Runnable {
      * @return The extracted terms per service
      */
     protected String[][] performExtraction(final String text) {
-        final String[][] extractions = new String[services.size()][];
-        int index = 0;
-        for(final NERService service : services.values())
-            extractions[index++] = service.extractTerms(text);
+        // The execution of the services happens in parallel.
+        // Create the extractors and corresponding threads
+        final Extractor[] extractors = new Extractor[services.size()];
+        int i = 0;
+        for (final NERService service : services.values()) {
+            final Extractor extractor = extractors[i++] = new Extractor(text, service);
+            extractor.start();
+        }
+        
+        // Wait for all threads to finish and collect their results
+        final String[][] extractions = new String[extractors.length][];
+        for (i = 0; i < extractors.length; i++) {
+            try {
+                extractors[i].join();
+            }
+            catch (InterruptedException e) { }
+            extractions[i] = extractors[i].getExtractedTerms();
+        }
         return extractions;
     }
 
@@ -97,5 +111,38 @@ public class NERProcess extends LongRunningProcess implements Runnable {
     @Override
     protected Runnable getRunnable() {
         return this;
+    }
+    
+    /**
+     * Thread that executes a named-entity recognition service
+     */
+    protected static class Extractor extends Thread {
+        private final String text;
+        private final NERService service;
+        private String[] extractedTerms;
+        
+        /**
+         * Creates a new <tt>Extractor</tt>
+         * @param text The text to analyze
+         * @param service The service that will analyze the text
+         */
+        public Extractor(final String text, final NERService service) {
+            this.text = text;
+            this.service = service;
+        }
+        
+        /**
+         * Gets the terms the service extracted from the text
+         * @return The extracted terms
+         */
+        public String[] getExtractedTerms() {
+            return extractedTerms;
+        }
+        
+        /** {@inheritDoc} */
+        @Override
+        public void run() {
+            extractedTerms = service.extractTerms(text);
+        }
     }
 }
