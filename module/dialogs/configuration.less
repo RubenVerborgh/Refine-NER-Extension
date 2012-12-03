@@ -3,13 +3,20 @@
   
   .dialog-body {
     overflow-y: auto;
-    max-height: 300px;
+    max-height: 350px;
+    
+    /* Avoid too much space on bottom in combination with list margin */
+    padding-bottom: 10px;
   }
   
   fieldset {
+    li {
+      margin: .3em 0;
+    }
+    
     input {
       margin: 0 -10px 0;
-      width: 385px;
+      width: 360px;
     }
   }
 }
