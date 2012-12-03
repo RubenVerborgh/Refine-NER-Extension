@@ -27,7 +27,7 @@ public class NERServiceManager {
     
     /**
      * Creates a new <tt>NERServiceManager</tt>
-     * @param settingsFile JSON file to read and store settings
+     * @param settingsFile JSON file to read and store settings (might not exist yet)
      * @throws IOException if the settings file cannot be read
      * @throws JSONException if the settings file contains invalid JSON
      * @throws ClassNotFoundException if a service cannot be instantiated
@@ -36,12 +36,12 @@ public class NERServiceManager {
         this.settingsFile = settingsFile;
         services = new HashMap<String, NERService>();
         
-        // Load settings from specified file if it exists, or default settings file otherwise
-        final Reader settingsReader = settingsFile.exists() ? new FileReader(settingsFile)
-                                      : new InputStreamReader(getClass().getResourceAsStream("DefaultServices.json"));
-        final JSONTokener tokener = new JSONTokener(settingsReader);
-        updateFrom((JSONArray)tokener.nextValue());
-        settingsReader.close();
+        // First load the default settings,
+        // so new services are automatically instantiated
+        updateFrom(new InputStreamReader(getClass().getResourceAsStream("DefaultServices.json")));
+        // Then, load the user's settings from the specified file (if it exists)
+        if (settingsFile.exists())
+            updateFrom(new FileReader(settingsFile));
     }
     
     /**
@@ -182,5 +182,20 @@ public class NERServiceManager {
                 }
             }
         }
+    }
+    
+    /**
+     * Updates the manager's configuration from the reader
+     * @param serviceValuesReader reader of service settings
+     * @throws JSONException if the JSON in the reader is in the wrong format
+     * @throws ClassNotFoundException if a service cannot be instantiated
+     */
+    public void updateFrom(final Reader serviceValuesReader) throws JSONException, ClassNotFoundException {
+        final JSONTokener tokener = new JSONTokener(serviceValuesReader);
+        updateFrom((JSONArray)tokener.nextValue());
+        try {
+            serviceValuesReader.close();
+        }
+        catch (IOException e) {}
     }
 }
