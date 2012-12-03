@@ -6,8 +6,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.util.HashMap;
 import java.util.Iterator;
+import java.util.TreeMap;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -22,7 +22,7 @@ import com.google.refine.util.JSONUtilities;
  * @author Ruben Verborgh
  */
 public class NERServiceManager {
-    private final HashMap<String, NERService> services;
+    private final TreeMap<String, NERService> services;
     private final File settingsFile;
     
     /**
@@ -34,7 +34,7 @@ public class NERServiceManager {
      */
     public NERServiceManager(final File settingsFile) throws IOException, JSONException, ClassNotFoundException {
         this.settingsFile = settingsFile;
-        services = new HashMap<String, NERService>();
+        services = new TreeMap<String, NERService>();
         
         // First load the default settings,
         // so new services are automatically instantiated

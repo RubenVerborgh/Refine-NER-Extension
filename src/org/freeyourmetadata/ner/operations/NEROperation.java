@@ -1,7 +1,7 @@
 package org.freeyourmetadata.ner.operations;
 
-import java.util.Map;
 import java.util.Properties;
+import java.util.SortedMap;
 
 import org.freeyourmetadata.ner.services.NERService;
 import org.json.JSONException;
@@ -21,7 +21,7 @@ import com.google.refine.util.JSONUtilities;
  */
 public class NEROperation extends EngineDependentOperation {
     private final Column column;
-    private final Map<String, NERService> services;
+    private final SortedMap<String, NERService> services;
     
     /**
      * Creates a new <tt>NEROperation</tt>
@@ -29,7 +29,7 @@ public class NEROperation extends EngineDependentOperation {
      * @param services The services that will be used for named-entity recognition
      * @param engineConfig The faceted browsing engine configuration
      */
-    public NEROperation(final Column column, final Map<String, NERService> services, final JSONObject engineConfig) {
+    public NEROperation(final Column column, final SortedMap<String, NERService> services, final JSONObject engineConfig) {
         super(engineConfig);
         this.column = column;
         this.services = services;
