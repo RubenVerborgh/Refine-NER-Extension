@@ -27,7 +27,7 @@ public class NEROperation extends EngineDependentOperation {
      * Creates a new <tt>NEROperation</tt>
      * @param column The column on which named-entity recognition is performed
      * @param services The services that will be used for named-entity recognition
-     * @param engineConfig The engine configuration
+     * @param engineConfig The faceted browsing engine configuration
      */
     public NEROperation(final Column column, final Map<String, NERService> services, final JSONObject engineConfig) {
         super(engineConfig);
@@ -57,6 +57,6 @@ public class NEROperation extends EngineDependentOperation {
     /** {@inheritDoc} */
     @Override
     public Process createProcess(final Project project, final Properties options) throws Exception {
-        return new NERProcess(project, column, services, this, getBriefDescription(project));
+        return new NERProcess(project, column, services, this, getBriefDescription(project), getEngineConfig());
     }
 }
