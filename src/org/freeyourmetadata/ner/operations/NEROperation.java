@@ -51,7 +51,7 @@ public class NEROperation extends EngineDependentOperation {
     /** {@inheritDoc} */
     @Override
     protected String getBriefDescription(final Project project) {
-        return String.format("Recognize named entities in column %s.", column.getName());
+        return String.format("Recognize named entities in column %s", column.getName());
     }
     
     /** {@inheritDoc} */
