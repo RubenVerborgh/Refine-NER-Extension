@@ -8,12 +8,18 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONWriter;
 
+import com.google.refine.model.Cell;
+import com.google.refine.model.Recon;
+import com.google.refine.model.ReconCandidate;
+import com.google.refine.model.Recon.Judgment;
+
 /**
  * A named entity with a label and URIs
  * @author Ruben Verborgh
  */
 public class NamedEntity {
     private final static URI[] EMPTY_URI_SET = new URI[0];
+    private final static String[] EMPTY_TYPE_SET = new String[0];
     
     private final String label;
     private final URI[] uris;
@@ -81,5 +87,32 @@ public class NamedEntity {
             json.value(uri.toString());
         json.endArray();
         json.endObject();
+    }
+    
+    /**
+     * Convert the named entity into a Refine worksheet cell
+     * @return The cell
+     */
+    public Cell toCell() {
+        final Recon recon;
+        // Don't include a reconciliation element if there are no URIs
+        if (getUris().length == 0) {
+            recon = null;
+        }
+        // Include a reconciliation candidate for each URI
+        else {
+            recon = new Recon(-1L, "", "");
+            // Create the candidates
+            for (final URI uri : getUris())
+                recon.addCandidate(new ReconCandidate(uri.toString(), getLabel(), EMPTY_TYPE_SET, 1.0));
+            // Pick the first one as the best match
+            recon.match = recon.candidates.get(0);
+            recon.matchRank = 0;
+            recon.judgment = Judgment.Matched;
+            recon.judgmentAction = "auto";
+            // Act as a reconciliation service
+            recon.service = "NamedEntity";
+        }
+        return new Cell(getLabel(), recon);
     }
 }

@@ -18,7 +18,6 @@ import org.json.JSONTokener;
 import org.json.JSONWriter;
 
 import com.google.refine.history.Change;
-import com.google.refine.model.Cell;
 import com.google.refine.model.Project;
 import com.google.refine.model.Row;
 import com.google.refine.model.changes.CellAtRow;
@@ -229,10 +228,8 @@ public class NERChange implements Change {
             // Place all named entities
             for (int c = 0; c < serviceEntities.length; c++) {
                 final NamedEntity[] entities = serviceEntities[c];
-                for (int r = 0; r < entities.length; r++) {
-                    final NamedEntity entity = entities[r];
-                    rows.get(rowNumber + r).cells.set(cellIndexes[c], new Cell(entity.getLabel(), null));
-                }
+                for (int r = 0; r < entities.length; r++)
+                    rows.get(rowNumber + r).cells.set(cellIndexes[c], entities[r].toCell());
             }
             // Advance to the next original row
             rowNumber += maxEntities;
