@@ -136,7 +136,9 @@ public class NERProcess extends LongRunningProcess implements Runnable {
             try {
                 extractors[i].join();
             }
-            catch (InterruptedException e) { }
+            catch (InterruptedException error) {
+                LOGGER.error("The extractor was interrupted", error);
+            }
             extractions[i] = extractors[i].getNamedEntities();
         }
         return extractions;
@@ -178,6 +180,8 @@ public class NERProcess extends LongRunningProcess implements Runnable {
      * Thread that executes a named-entity recognition service
      */
     protected static class Extractor extends Thread {
+        private final static NamedEntity[] EMPTY_ENTITY_SET = new NamedEntity[0];
+        
         private final String text;
         private final NERService service;
         private NamedEntity[] namedEntities;
@@ -190,6 +194,7 @@ public class NERProcess extends LongRunningProcess implements Runnable {
         public Extractor(final String text, final NERService service) {
             this.text = text;
             this.service = service;
+            this.namedEntities = EMPTY_ENTITY_SET;
         }
         
         /**
@@ -203,7 +208,12 @@ public class NERProcess extends LongRunningProcess implements Runnable {
         /** {@inheritDoc} */
         @Override
         public void run() {
-            namedEntities = service.extractNamedEntities(text);
+            try {
+                namedEntities = service.extractNamedEntities(text);
+            }
+            catch (Exception error) {
+                LOGGER.error("The extractor failed", error);
+            }
         }
     }
 }
