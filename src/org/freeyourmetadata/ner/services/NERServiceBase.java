@@ -13,11 +13,11 @@ import java.util.HashMap;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONTokener;
 import org.json.JSONWriter;
@@ -30,7 +30,6 @@ import com.google.common.base.Charsets;
  * @author Ruben Verborgh
  */
 public abstract class NERServiceBase implements NERService {
-    private final static Logger LOGGER = Logger.getLogger(NERServiceBase.class);
     private final static NamedEntity[] EMPTY_EXTRACTION_RESULT = new NamedEntity[0];
     
     private final URI serviceUrl;
@@ -82,15 +81,9 @@ public abstract class NERServiceBase implements NERService {
     
     /** {@inheritDoc} */
     @Override
-    public NamedEntity[] extractNamedEntities(final String text) {
+    public NamedEntity[] extractNamedEntities(final String text) throws Exception {
         final HttpUriRequest request = createExtractionRequest(text);
-        try {
-            return performExtractionRequest(request);
-        }
-        catch (Exception error) {
-            LOGGER.debug("Error performing named-entity extraction", error);
-            return EMPTY_EXTRACTION_RESULT;
-        }
+        return performExtractionRequest(request);
     }
     
     /**
@@ -102,6 +95,10 @@ public abstract class NERServiceBase implements NERService {
     protected NamedEntity[] performExtractionRequest(final HttpUriRequest request) throws Exception {
         final DefaultHttpClient httpClient = new DefaultHttpClient();
         final HttpResponse response = httpClient.execute(request);
+        if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK)
+            throw new IllegalStateException(
+                    String.format("The extraction request returned status code %d instead of %s.",
+                                  response.getStatusLine().getStatusCode(), HttpStatus.SC_OK));
         final HttpEntity responseEntity = response.getEntity();
         return parseExtractionResponseEntity(responseEntity);
     }

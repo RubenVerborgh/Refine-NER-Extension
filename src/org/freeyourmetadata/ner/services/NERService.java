@@ -9,8 +9,9 @@ public interface NERService {
      * Extracts named entities from the specified text
      * @param text The text
      * @return The extracted named entities
+     * @throws Exception if the extraction fails
      */
-    public NamedEntity[] extractNamedEntities(String text);
+    public NamedEntity[] extractNamedEntities(String text) throws Exception;
     
     /**
      * Gets the names of supported properties of the service
