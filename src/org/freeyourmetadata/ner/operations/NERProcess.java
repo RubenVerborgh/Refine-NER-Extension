@@ -88,6 +88,8 @@ public class NERProcess extends LongRunningProcess implements Runnable {
         final NamedEntity[][][] namedEntities = new NamedEntity[rowsTotal][][];
         int rowsProcessed = 0;
         for (int rowIndex = 0; rowIndex < rowsTotal; rowIndex++) {
+            // Initialize to the empty result set, in case no entities are extracted
+            namedEntities[rowIndex] = EMPTY_RESULT_SET;
             // If the row is part of the filter, extract entities
             if (filteredRowIndices.contains(rowIndex)) {
                 final Row row = project.rows.get(rowIndex);
@@ -102,10 +104,6 @@ public class NERProcess extends LongRunningProcess implements Runnable {
                     namedEntities[rowIndex] = performExtraction(text);
                 }
                 _progress = 100 * ++rowsProcessed / rowsFiltered;
-            }
-            // The row is not part of the filter; do not extract entities
-            else {
-                namedEntities[rowIndex] = EMPTY_RESULT_SET;
             }
             // Exit directly if the process has been cancelled
             if (_canceled)
