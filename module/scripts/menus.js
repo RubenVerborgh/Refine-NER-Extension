@@ -5,13 +5,13 @@ ExtensionBar.addExtensionMenu({
   submenu: [
     {
       id   : "named-entity-recognition/configuration",
-      label: "Configure API keys…",
+      label: "Configure API keys...",
       click: dialogHandler(ConfigurationDialog),
     },
     { /* separator */ },
     {
       id   : "named-entity-recognition/about",
-      label: "About…",
+      label: "About...",
       click: dialogHandler(AboutDialog),
     },
   ]
@@ -23,7 +23,7 @@ DataTableColumnHeaderUI.extendMenu(function (column, columnHeaderUI, menu) {
     { /* separator */ },
     {
       id: "named-entity-recognition/extract",
-      label: "Extract named entities…",
+      label: "Extract named entities...",
       click: dialogHandler(ExtractionDialog, column),
     },
   ]);
