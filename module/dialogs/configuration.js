@@ -43,8 +43,9 @@ ConfigurationDialog.prototype = {
     DialogSystem.dismissUntil(this.dialogLevel - 1);
   },
   
-  update: function () {;
-    $.ajax(NERExtension.servicesPath, {
+  update: function () {
+    $.ajax({
+      url: NERExtension.servicesPath,
       type: "PUT",
       data: JSON.stringify(this.services),
       success: this.bound("hide"),
