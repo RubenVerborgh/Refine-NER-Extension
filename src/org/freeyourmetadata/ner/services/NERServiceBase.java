@@ -9,6 +9,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 
 import org.apache.http.HttpEntity;
@@ -22,8 +23,6 @@ import org.json.JSONException;
 import org.json.JSONTokener;
 import org.json.JSONWriter;
 
-import com.google.common.base.Charsets;
-
 /**
  * Abstract base class for named-entity recognition services
  * with default support for JSON communication (but others are possible)
@@ -31,6 +30,7 @@ import com.google.common.base.Charsets;
  */
 public abstract class NERServiceBase implements NERService {
     private final static NamedEntity[] EMPTY_EXTRACTION_RESULT = new NamedEntity[0];
+    private final static Charset UTF8 = Charset.forName("UTF-8");
     
     private final URI serviceUrl;
     private final String[] propertyNames;
@@ -132,7 +132,7 @@ public abstract class NERServiceBase implements NERService {
      */
     protected HttpEntity createExtractionRequestBody(final String text) {
         final ByteArrayOutputStream bodyOutput = new ByteArrayOutputStream();
-        final JSONWriter bodyWriter = new JSONWriter(new OutputStreamWriter(bodyOutput, Charsets.UTF_8));
+        final JSONWriter bodyWriter = new JSONWriter(new OutputStreamWriter(bodyOutput, UTF8));
         try {
             writeExtractionRequestBody(text, bodyWriter);
         }
