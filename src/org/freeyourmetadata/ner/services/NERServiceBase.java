@@ -31,6 +31,7 @@ import org.json.JSONWriter;
 public abstract class NERServiceBase implements NERService {
     private final static NamedEntity[] EMPTY_EXTRACTION_RESULT = new NamedEntity[0];
     private final static Charset UTF8 = Charset.forName("UTF-8");
+    private final static URI EMPTYURI = createUri("");
     
     private final URI serviceUrl;
     private final String[] propertyNames;
@@ -188,7 +189,7 @@ public abstract class NERServiceBase implements NERService {
             return new URI(uri);
         }
         catch (URISyntaxException e) {
-            return null;
+            return EMPTYURI;
         }
     }
     
