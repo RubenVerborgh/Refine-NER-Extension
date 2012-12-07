@@ -43,6 +43,10 @@ public class DBpediaLookup extends NERServiceBase {
     @Override
     protected NamedEntity[] parseExtractionResponseEntity(final JSONTokener tokener) throws JSONException {
         final JSONObject response = (JSONObject)tokener.nextValue();
+        // Empty result if no resources were found
+        if (!response.has("Resources"))
+            return EMPTY_EXTRACTION_RESULT;
+        // Extract resources
         final JSONArray resources = response.getJSONArray("Resources");
         final NamedEntity[] results = new NamedEntity[resources.length()];
         for (int i = 0; i < resources.length(); i++) {
