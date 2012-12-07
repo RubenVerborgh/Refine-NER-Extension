@@ -29,7 +29,9 @@ import org.json.JSONWriter;
  * @author Ruben Verborgh
  */
 public abstract class NERServiceBase implements NERService {
-    private final static NamedEntity[] EMPTY_EXTRACTION_RESULT = new NamedEntity[0];
+    /** The empty extraction result, containing no entities. */
+    protected final static NamedEntity[] EMPTY_EXTRACTION_RESULT = new NamedEntity[0];
+    
     private final static Charset UTF8 = Charset.forName("UTF-8");
     private final static URI EMPTYURI = createUri("");
     
@@ -108,11 +110,13 @@ public abstract class NERServiceBase implements NERService {
      * Creates a named-entity recognition request on the specified text
      * @param text The text to analyze
      * @return The created request
+     * @throws Exception if the request cannot be created
      */
-    protected HttpUriRequest createExtractionRequest(final String text) {
+    protected HttpUriRequest createExtractionRequest(final String text) throws Exception {
         final URI requestUrl = createExtractionRequestUrl(text);
         final HttpEntity body = createExtractionRequestBody(text);
         final HttpPost request = new HttpPost(requestUrl);
+        request.setHeader("Accept", "application/json");
         request.setEntity(body);
         return request;
     }
@@ -130,8 +134,9 @@ public abstract class NERServiceBase implements NERService {
      * Creates the body for a named-entity recognition request on the specified text
      * @param text The text to analyze
      * @return The created body entity
+     * @throws Exception if the request body cannot be created
      */
-    protected HttpEntity createExtractionRequestBody(final String text) {
+    protected HttpEntity createExtractionRequestBody(final String text) throws Exception {
         final ByteArrayOutputStream bodyOutput = new ByteArrayOutputStream();
         final JSONWriter bodyWriter = new JSONWriter(new OutputStreamWriter(bodyOutput, UTF8));
         try {

@@ -1,12 +1,16 @@
 package org.freeyourmetadata.ner.services;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.HttpEntity;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -17,7 +21,7 @@ import org.json.JSONTokener;
  * @author Ruben Verborgh
  */
 public class Alchemy extends NERServiceBase {
-    private final static String SERVICEBASEURL = "http://access.alchemyapi.com/calls/text/TextGetRankedNamedEntities";
+    private final static URI SERVICEBASEURL = createUri("http://access.alchemyapi.com/calls/text/TextGetRankedNamedEntities?outputMode=json");
     private final static String[] PROPERTYNAMES = { "API key" };
     private final static HashSet<String> NONURIFIELDS = new HashSet<String>(
             Arrays.asList(new String[]{ "subType", "name", "website" }));
@@ -26,22 +30,15 @@ public class Alchemy extends NERServiceBase {
      * Creates a new Alchemy service connector
      */
     public Alchemy() {
-        super(PROPERTYNAMES);
+        super(SERVICEBASEURL, PROPERTYNAMES);
     }
     
     /** {@inheritDoc} */
-    protected HttpUriRequest createExtractionRequest(final String text) {
-        return new HttpGet(createExtractionRequestUrl(text));
-    }
-    
-    /** {@inheritDoc} */
-    @Override
-    protected URI createExtractionRequestUrl(final String text) {
-        final StringBuilder uri = new StringBuilder(SERVICEBASEURL);
-        uri.append("?apikey=").append(urlEncode(getProperty("API key")))
-           .append("&outputMode=json")
-           .append("&text=").append(urlEncode(text));
-        return createUri(uri.toString());
+    protected HttpEntity createExtractionRequestBody(final String text) throws UnsupportedEncodingException {
+        final ArrayList<NameValuePair> parameters = new ArrayList<NameValuePair>(2);
+        parameters.add(new BasicNameValuePair("apikey", getProperty("API key")));
+        parameters.add(new BasicNameValuePair("text", text));
+        return new UrlEncodedFormEntity(parameters);
     }
     
     /** {@inheritDoc} */

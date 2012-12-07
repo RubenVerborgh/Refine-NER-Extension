@@ -1,8 +1,13 @@
 package org.freeyourmetadata.ner.services;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.util.ArrayList;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -13,26 +18,25 @@ import org.json.JSONTokener;
  * @author Ruben Verborgh
  */
 public class Zemanta extends NERServiceBase {
-    private final static String SERVICEBASEURL = "http://papi.zemanta.com/services/rest/0.0/";
+    private final static URI SERVICEBASEURL = createUri("http://papi.zemanta.com/services/rest/0.0/");
     private final static String[] PROPERTYNAMES = { "API key" };
     
     /**
      * Creates a new Zemanta service connector
      */
     public Zemanta() {
-        super(PROPERTYNAMES);
+        super(SERVICEBASEURL, PROPERTYNAMES);
     }
-
+    
     /** {@inheritDoc} */
-    @Override
-    protected URI createExtractionRequestUrl(final String text) {
-        final StringBuilder uri = new StringBuilder(SERVICEBASEURL);
-        uri.append("?method=zemanta.suggest_markup")
-           .append("&format=json")
-           .append("&return_rdf_links=1")
-           .append("&api_key=").append(urlEncode(getProperty("API key")))
-           .append("&text=").append(urlEncode(text));
-        return createUri(uri.toString());
+    protected HttpEntity createExtractionRequestBody(final String text) throws UnsupportedEncodingException {
+        final ArrayList<NameValuePair> parameters = new ArrayList<NameValuePair>(5);
+        parameters.add(new BasicNameValuePair("method", "zemanta.suggest_markup"));
+        parameters.add(new BasicNameValuePair("format", "json"));
+        parameters.add(new BasicNameValuePair("return_rdf_links", "1"));
+        parameters.add(new BasicNameValuePair("api_key", getProperty("API key")));
+        parameters.add(new BasicNameValuePair("text", text));
+        return new UrlEncodedFormEntity(parameters);
     }
     
     /** {@inheritDoc} */
