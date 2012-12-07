@@ -2,6 +2,7 @@ package org.freeyourmetadata.ner.services;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -103,17 +104,25 @@ public class NamedEntity {
      * @return The cell
      */
     public Cell toCell() {
-        final Recon recon;
+        // Find all non-empty URIs
+        final ArrayList<String> nonEmptyUris = new ArrayList<String>(getUris().length);
+        for (final URI uri : getUris()) {
+            final String uriString = uri == null ? "" : uri.toString();
+            if (uriString.length() > 0)
+                nonEmptyUris.add(uriString);
+        }
+        
         // Don't include a reconciliation element if there are no URIs
-        if (getUris().length == 0) {
+        final Recon recon;
+        if (nonEmptyUris.size() == 0) {
             recon = null;
         }
         // Include a reconciliation candidate for each URI
         else {
             recon = new Recon(-1L, "", "");
             // Create the candidates
-            for (final URI uri : getUris())
-                recon.addCandidate(new ReconCandidate(uri.toString(), getLabel(), EMPTY_TYPE_SET, 1.0));
+            for (final String uri : nonEmptyUris)
+                recon.addCandidate(new ReconCandidate(uri, getLabel(), EMPTY_TYPE_SET, 1.0));
             // Pick the first one as the best match
             recon.match = recon.candidates.get(0);
             recon.matchRank = 0;
