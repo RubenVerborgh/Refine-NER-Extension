@@ -38,13 +38,14 @@ public abstract class NERServiceBase implements NERService {
     private final URI serviceUrl;
     private final String[] propertyNames;
     private final HashMap<String, String> properties;
+    private final URI documentationUri;
     
     /**
      * Creates a new named-entity recognition service base class
      * @param propertyNames The names of supported properties
      */
     public NERServiceBase(final String[] propertyNames) {
-        this(null, propertyNames);
+        this(null, propertyNames, null);
     }
     
     /**
@@ -53,8 +54,19 @@ public abstract class NERServiceBase implements NERService {
      * @param propertyNames The names of supported properties
      */
     public NERServiceBase(final URI serviceUrl, final String[] propertyNames) {
+       this(serviceUrl, propertyNames, null);
+    }
+    
+    /**
+     * Creates a new named-entity recognition service base class
+     * @param serviceUrl The URL of the service (can be null if not fixed)
+     * @param propertyNames The names of supported properties
+     * @param documentationUri The URI of the service's documentation
+     */
+    public NERServiceBase(final URI serviceUrl, final String[] propertyNames, final URI documentationUri) {
         this.serviceUrl = serviceUrl;
         this.propertyNames = propertyNames;
+        this.documentationUri = documentationUri;
         
         properties = new HashMap<String, String>(propertyNames.length);
         for (String propertyName : propertyNames)
@@ -87,6 +99,12 @@ public abstract class NERServiceBase implements NERService {
     public NamedEntity[] extractNamedEntities(final String text) throws Exception {
         final HttpUriRequest request = createExtractionRequest(text);
         return performExtractionRequest(request);
+    }
+    
+    /** {@inheritDoc} */
+    @Override
+    public URI getDocumentationUri() {
+        return documentationUri;
     }
     
     /**

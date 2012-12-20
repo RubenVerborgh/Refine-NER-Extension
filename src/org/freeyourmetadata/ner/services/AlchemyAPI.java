@@ -22,6 +22,7 @@ import org.json.JSONTokener;
  */
 public class AlchemyAPI extends NERServiceBase {
     private final static URI SERVICEBASEURL = createUri("http://access.alchemyapi.com/calls/text/TextGetRankedNamedEntities?outputMode=json");
+    private final static URI DOCUMENTATIONURI = createUri("http://freeyourmetadata.org/named-entity-extraction/alchemyapi/");
     private final static String[] PROPERTYNAMES = { "API key" };
     private final static HashSet<String> NONURIFIELDS = new HashSet<String>(
             Arrays.asList(new String[]{ "subType", "name", "website" }));
@@ -30,7 +31,7 @@ public class AlchemyAPI extends NERServiceBase {
      * Creates a new Alchemy service connector
      */
     public AlchemyAPI() {
-        super(SERVICEBASEURL, PROPERTYNAMES);
+        super(SERVICEBASEURL, PROPERTYNAMES, DOCUMENTATIONURI);
     }
     
     /** {@inheritDoc} */

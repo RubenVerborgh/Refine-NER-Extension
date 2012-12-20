@@ -16,8 +16,10 @@ ConfigurationDialog.prototype = {
       self.services = services;
       services.forEach(function (service) {
         var settings = service.settings,
-            $service = $('<fieldset/>').append($('<legend/>').text(service.name)),
+            $title = $('<legend/>').text(service.name),
+            $service = $('<fieldset/>').append($title),
             $settings = $('<ol>').appendTo($service);
+        // Add all settings
         Object.keys(settings).forEach(function (settingName) {
           var id = encodeURIComponent(service.name + '-' + settingName);
           $settings.append($('<li>')
@@ -26,6 +28,13 @@ ConfigurationDialog.prototype = {
                                      change: function (event) { settings[settingName] = $(event.target).val(); },
                                    })));
         });
+        // Add configuration instructions
+        if (service.documentation)
+          $title.append(' ', $('<a/>', { 'class': 'documentation',
+                                         text: 'configuration instructions',
+                                         href: service.documentation,
+                                         target: '_blank' }));
+        // Add the service to the list
         $services.append($service);
       });
       if (callback)

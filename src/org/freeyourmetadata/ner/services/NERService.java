@@ -1,5 +1,7 @@
 package org.freeyourmetadata.ner.services;
 
+import java.net.URI;
+
 /**
  * Interface for named-entity recognition services
  * @author Ruben Verborgh
@@ -32,4 +34,10 @@ public interface NERService {
      * @param value The property value
      */
     public void setProperty(String name, String value);
+    
+    /**
+     * Gets a URI with documentation about the service
+     * @return A documentation URI
+     */
+    public URI getDocumentationUri();
 }

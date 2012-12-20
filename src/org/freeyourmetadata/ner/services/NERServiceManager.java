@@ -141,6 +141,8 @@ public class NERServiceManager {
                     output.value(serviceName);
                     output.key("class");
                     output.value(service.getClass().getName());
+                    output.key("documentation");
+                    output.value(service.getDocumentationUri());
                     
                     /* Service settings object */
                     output.key("settings");

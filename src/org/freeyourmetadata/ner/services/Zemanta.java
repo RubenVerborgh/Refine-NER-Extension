@@ -19,13 +19,14 @@ import org.json.JSONTokener;
  */
 public class Zemanta extends NERServiceBase {
     private final static URI SERVICEBASEURL = createUri("http://papi.zemanta.com/services/rest/0.0/");
+    private final static URI DOCUMENTATIONURI = createUri("http://freeyourmetadata.org/named-entity-extraction/zemanta/");
     private final static String[] PROPERTYNAMES = { "API key" };
     
     /**
      * Creates a new Zemanta service connector
      */
     public Zemanta() {
-        super(SERVICEBASEURL, PROPERTYNAMES);
+        super(SERVICEBASEURL, PROPERTYNAMES, DOCUMENTATIONURI);
     }
     
     /** {@inheritDoc} */
