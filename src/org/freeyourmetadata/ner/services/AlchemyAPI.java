@@ -20,7 +20,7 @@ import org.json.JSONTokener;
  * Alchemy service connector
  * @author Ruben Verborgh
  */
-public class Alchemy extends NERServiceBase {
+public class AlchemyAPI extends NERServiceBase {
     private final static URI SERVICEBASEURL = createUri("http://access.alchemyapi.com/calls/text/TextGetRankedNamedEntities?outputMode=json");
     private final static String[] PROPERTYNAMES = { "API key" };
     private final static HashSet<String> NONURIFIELDS = new HashSet<String>(
@@ -29,7 +29,7 @@ public class Alchemy extends NERServiceBase {
     /**
      * Creates a new Alchemy service connector
      */
-    public Alchemy() {
+    public AlchemyAPI() {
         super(SERVICEBASEURL, PROPERTYNAMES);
     }
     
@@ -48,7 +48,7 @@ public class Alchemy extends NERServiceBase {
         // Check response status
         final JSONObject response = (JSONObject)tokener.nextValue();
         if (!"OK".equals(response.getString("status")))
-            throw new IllegalArgumentException("The Alchemy request did not succeed.");
+            throw new IllegalArgumentException("The AlchemyAPI request did not succeed.");
         // Find all entities
         final JSONArray entities = response.getJSONArray("entities");
         final NamedEntity[] results = new NamedEntity[entities.length()];
