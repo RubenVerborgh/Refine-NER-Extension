@@ -9,6 +9,7 @@ import java.io.Reader;
 import java.util.Iterator;
 import java.util.TreeMap;
 
+import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -22,6 +23,8 @@ import com.google.refine.util.JSONUtilities;
  * @author Ruben Verborgh
  */
 public class NERServiceManager {
+    private final static Logger LOGGER = Logger.getLogger(NERServiceManager.class);
+    
     private final TreeMap<String, NERService> services;
     private final File settingsFile;
     
@@ -159,10 +162,9 @@ public class NERServiceManager {
      * Updates the manager's configuration from the JSON array
      * @param serviceValues array of service settings
      * @throws JSONException if the objects in the array are in the wrong format
-     * @throws ClassNotFoundException if a service cannot be instantiated
      */
     @SuppressWarnings("unchecked")
-    public void updateFrom(final JSONArray serviceValues) throws JSONException, ClassNotFoundException {
+    public void updateFrom(final JSONArray serviceValues) throws JSONException {
         /* Array of services */
         final Object[] services = JSONUtilities.toArray((JSONArray)serviceValues);
         for (final Object value : services) {
@@ -170,16 +172,22 @@ public class NERServiceManager {
             if (!(value instanceof JSONObject))
                 throw new IllegalArgumentException("Value should be an array of JSON objects.");
             final JSONObject serviceValue = (JSONObject)value;
-            final NERService service = getOrCreateService(serviceValue.getString("name"), serviceValue.getString("class"));
-            
-            /* Service settings object */
-            if (serviceValue.has("settings")) {
-                final JSONObject settings = serviceValue.getJSONObject("settings");
-                final Iterator<String> settingNames = settings.keys();
-                while (settingNames.hasNext()) {
-                    final String settingName = settingNames.next();
-                    service.setProperty(settingName, settings.getString(settingName));
+            try {
+                final NERService service = getOrCreateService(serviceValue.getString("name"),
+                                                              serviceValue.getString("class"));
+                /* Service settings object */
+                if (serviceValue.has("settings")) {
+                    final JSONObject settings = serviceValue.getJSONObject("settings");
+                    final Iterator<String> settingNames = settings.keys();
+                    while (settingNames.hasNext()) {
+                        final String settingName = settingNames.next();
+                        service.setProperty(settingName, settings.getString(settingName));
+                    }
                 }
+            }
+            catch (ClassNotFoundException e) {
+                LOGGER.error(String.format("Could not find NER service with class %s.",
+                                           serviceValue.getString("class")));
             }
         }
     }
