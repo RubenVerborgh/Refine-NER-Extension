@@ -29,6 +29,11 @@ public class DummyNER extends NERServiceBase {
     }
     
     /** {@inheritDoc} */
+    public boolean isConfigured() {
+        return getProperty("API user").length() > 0 && getProperty("API key").length() > 0;
+    }
+    
+    /** {@inheritDoc} */
     @Override
     protected HttpEntity createExtractionRequestBody(final String text) {
         final byte[] textBytes = text.getBytes(Charsets.UTF_8);

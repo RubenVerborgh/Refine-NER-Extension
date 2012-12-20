@@ -35,6 +35,11 @@ public class AlchemyAPI extends NERServiceBase {
     }
     
     /** {@inheritDoc} */
+    public boolean isConfigured() {
+        return getProperty("API key").length() > 0;
+    }
+    
+    /** {@inheritDoc} */
     protected HttpEntity createExtractionRequestBody(final String text) throws UnsupportedEncodingException {
         final ArrayList<NameValuePair> parameters = new ArrayList<NameValuePair>(2);
         parameters.add(new BasicNameValuePair("apikey", getProperty("API key")));

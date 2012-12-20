@@ -102,6 +102,11 @@ public abstract class NERServiceBase implements NERService {
     }
     
     /** {@inheritDoc} */
+    public boolean isConfigured() {
+        return true;
+    }
+    
+    /** {@inheritDoc} */
     @Override
     public URI getDocumentationUri() {
         return documentationUri;

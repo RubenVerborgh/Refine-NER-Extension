@@ -36,6 +36,12 @@ public interface NERService {
     public void setProperty(String name, String value);
     
     /**
+     * Indicates whether the service has been configured
+     * @return <tt>true</tt> if the service has been configured
+     */
+    public boolean isConfigured();
+    
+    /**
      * Gets a URI with documentation about the service
      * @return A documentation URI
      */

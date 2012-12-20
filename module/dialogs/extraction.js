@@ -30,6 +30,14 @@ ExtractionDialog.prototype = {
                           }}),
             $label = $('<label/>', { 'class': 'checkbox' })
                         .append($service, service.name);
+        if (!service.configured) {
+          $service.attr('disabled', true);
+          $label.addClass('disabled');
+          $label.append(' ', $('<a/>', { text: 'configure...',
+                                         href: 'javascript:;',
+                                         click: self.bound('showConfigurationDialog'),
+                                       }));
+        }
         $services.append($('<li/>').append($label));
       });
       if (callback)
@@ -59,5 +67,10 @@ ExtractionDialog.prototype = {
                        {},
                        { rowsChanged: true, modelsChanged: true });
     this.hide();
-  }
+  },
+  
+  showConfigurationDialog: function () {
+    this.hide();
+    new ConfigurationDialog().show();
+  },
 };
