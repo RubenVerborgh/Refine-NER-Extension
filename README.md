@@ -1,5 +1,5 @@
 # OpenRefine Named-Entity Recognition extension
-This extension adds support for named-entity recognition services to [Google Refine](http://code.google.com/p/google-refine/) / [OpenRefine](https://github.com/OpenRefine/OpenRefine).
+This extension adds support for [named-entity recognition](http://en.wikipedia.org/wiki/Named-entity_recognition) services to [Google Refine](http://code.google.com/p/google-refine/) / [OpenRefine](https://github.com/OpenRefine/OpenRefine).
 
 ![[Screenshot of the extension]](http://freeyourmetadata.org/images/ner-extension.png)
 
