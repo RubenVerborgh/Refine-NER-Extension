@@ -55,6 +55,7 @@
             <src path="${src.dir}"/>
             <classpath refid="class.path" />
         </javac>
+        <copy file="src/org/freeyourmetadata/ner/services/DefaultServices.json" todir="${classes.dir}/org/freeyourmetadata/ner/services/"/>
     </target>
 
     <target name="build" depends="build_java"/>
