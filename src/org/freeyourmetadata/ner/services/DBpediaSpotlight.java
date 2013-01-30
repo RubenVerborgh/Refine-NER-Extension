@@ -14,17 +14,17 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 
 /**
- * DBpedia lookup service connector
+ * DBpedia spotlight service connector
  * @author Ruben Verborgh
  */
-public class DBpediaLookup extends NERServiceBase {
+public class DBpediaSpotlight extends NERServiceBase implements NERService {
     private final static URI SERVICEBASEURL = createUri("http://spotlight.dbpedia.org/rest/annotate");
     private final static String[] PROPERTYNAMES = { "Confidence", "Support" };
 
     /**
-     * Creates a new DBpedia lookup service connector
+     * Creates a new DBpedia spotlight service connector
      */
-    public DBpediaLookup() {
+    public DBpediaSpotlight() {
         super(SERVICEBASEURL, PROPERTYNAMES);
         setProperty("Confidence", "0.5");
         setProperty("Support", "30");
