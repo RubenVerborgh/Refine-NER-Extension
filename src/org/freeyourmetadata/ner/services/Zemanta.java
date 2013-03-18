@@ -65,11 +65,13 @@ public class Zemanta extends NERServiceBase {
             final JSONObject link = links.getJSONObject(i);
             final JSONArray targets = link.getJSONArray("target");
             final String label = targets.getJSONObject(0).getString("title");
-            final URI[] urls = new URI[targets.length()];
-            // Find all target URLs
-            for (int j = 0; j < targets.length(); j++)
-                urls[j] = createUri(targets.getJSONObject(j).getString("url"));
-            results.add(new NamedEntity(label, urls));
+            // Make a disambiguation from each target
+            final Disambiguation[] disambiguations = new Disambiguation[targets.length()];
+            for (int j = 0; j < targets.length(); j++) {
+                final JSONObject target = targets.getJSONObject(j);
+                disambiguations[j] = new Disambiguation(target.getString("title"), createUri(target.getString("url")));
+            }
+            results.add(new NamedEntity(label, disambiguations));
         }
         return results.toArray(new NamedEntity[results.size()]);
     }

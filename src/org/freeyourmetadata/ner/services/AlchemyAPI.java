@@ -57,25 +57,28 @@ public class AlchemyAPI extends NERServiceBase {
         final JSONObject response = (JSONObject)tokener.nextValue();
         if (!"OK".equals(response.getString("status")))
             throw new IllegalArgumentException("The AlchemyAPI request did not succeed.");
+        
         // Find all entities
         final JSONArray entities = response.getJSONArray("entities");
         final NamedEntity[] results = new NamedEntity[entities.length()];
         for (int i = 0; i < results.length; i++) {
             final JSONObject entity = entities.getJSONObject(i);
-            final String label = entity.getString("text");
-            // Find possible URLs in the entities
-            final HashSet<URI> uris = new HashSet<URI>();
+            final String entityText = entity.getString("text");
+            
+            // Find all disambiguations
+            final ArrayList<Disambiguation> disambiguations = new ArrayList<Disambiguation>();
             if (entity.has("disambiguated")) {
                 final JSONObject disambiguated = entity.getJSONObject("disambiguated");
+                final String label = disambiguated.getString("name");
                 final Iterator<String> keyIterator = disambiguated.keys();
                 while (keyIterator.hasNext()) {
                     final String key = keyIterator.next();
                     if (!NONURIFIELDS.contains(key))
-                        uris.add(createUri(disambiguated.getString(key)));
+                        disambiguations.add(new Disambiguation(label, createUri(disambiguated.getString(key))));
                 }
             }
             // Create new named entity for the result
-            results[i] = new NamedEntity(label, uris.toArray(new URI[uris.size()]));
+            results[i] = new NamedEntity(entityText, disambiguations);
         }
         return results;
     }
