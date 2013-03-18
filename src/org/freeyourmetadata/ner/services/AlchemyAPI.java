@@ -1,5 +1,7 @@
 package org.freeyourmetadata.ner.services;
 
+import static org.freeyourmetadata.util.UriUtil.createUri;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.util.ArrayList;
