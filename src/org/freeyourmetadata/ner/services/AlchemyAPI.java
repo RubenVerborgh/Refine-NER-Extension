@@ -10,9 +10,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 
 import org.apache.http.HttpEntity;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.message.BasicNameValuePair;
+import org.freeyourmetadata.util.ParameterList;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -43,10 +41,10 @@ public class AlchemyAPI extends NERServiceBase {
     
     /** {@inheritDoc} */
     protected HttpEntity createExtractionRequestBody(final String text) throws UnsupportedEncodingException {
-        final ArrayList<NameValuePair> parameters = new ArrayList<NameValuePair>(2);
-        parameters.add(new BasicNameValuePair("apikey", getProperty("API key")));
-        parameters.add(new BasicNameValuePair("text", text));
-        return new UrlEncodedFormEntity(parameters);
+        final ParameterList parameters = new ParameterList();
+        parameters.add("apikey", getProperty("API key"));
+        parameters.add("text", text);
+        return parameters.toEntity();
     }
     
     /** {@inheritDoc} */

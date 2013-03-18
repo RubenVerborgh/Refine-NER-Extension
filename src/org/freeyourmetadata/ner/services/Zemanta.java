@@ -7,9 +7,7 @@ import java.net.URI;
 import java.util.ArrayList;
 
 import org.apache.http.HttpEntity;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.message.BasicNameValuePair;
+import org.freeyourmetadata.util.ParameterList;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -38,13 +36,13 @@ public class Zemanta extends NERServiceBase {
     
     /** {@inheritDoc} */
     protected HttpEntity createExtractionRequestBody(final String text) throws UnsupportedEncodingException {
-        final ArrayList<NameValuePair> parameters = new ArrayList<NameValuePair>(5);
-        parameters.add(new BasicNameValuePair("method", "zemanta.suggest_markup"));
-        parameters.add(new BasicNameValuePair("format", "json"));
-        parameters.add(new BasicNameValuePair("return_rdf_links", "1"));
-        parameters.add(new BasicNameValuePair("api_key", getProperty("API key")));
-        parameters.add(new BasicNameValuePair("text", text));
-        return new UrlEncodedFormEntity(parameters);
+        final ParameterList parameters = new ParameterList();
+        parameters.add("method", "zemanta.suggest_markup");
+        parameters.add("format", "json");
+        parameters.add("return_rdf_links", "1");
+        parameters.add("api_key", getProperty("API key"));
+        parameters.add("text", text);
+        return parameters.toEntity();
     }
     
     /** {@inheritDoc} */

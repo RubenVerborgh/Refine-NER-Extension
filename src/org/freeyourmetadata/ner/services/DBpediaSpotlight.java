@@ -4,12 +4,9 @@ import static org.freeyourmetadata.util.UriUtil.createUri;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
-import java.util.ArrayList;
 
 import org.apache.http.HttpEntity;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.message.BasicNameValuePair;
+import org.freeyourmetadata.util.ParameterList;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -34,11 +31,11 @@ public class DBpediaSpotlight extends NERServiceBase implements NERService {
     
     /** {@inheritDoc} */
     protected HttpEntity createExtractionRequestBody(final String text) throws UnsupportedEncodingException {
-        final ArrayList<NameValuePair> parameters = new ArrayList<NameValuePair>(3);
-        parameters.add(new BasicNameValuePair("confidence", getProperty("Confidence")));
-        parameters.add(new BasicNameValuePair("support", getProperty("Support")));
-        parameters.add(new BasicNameValuePair("text", text));
-        return new UrlEncodedFormEntity(parameters);
+        final ParameterList parameters = new ParameterList();
+        parameters.add("confidence", getProperty("Confidence"));
+        parameters.add("support", getProperty("Support"));
+        parameters.add("text", text);
+        return parameters.toEntity();
     }
     
     /** {@inheritDoc} */

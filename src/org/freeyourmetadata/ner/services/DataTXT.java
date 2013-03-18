@@ -8,9 +8,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import org.apache.http.HttpEntity;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.message.BasicNameValuePair;
+import org.freeyourmetadata.util.ParameterList;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -47,18 +45,18 @@ public class DataTXT extends NERServiceBase {
 
     /** {@inheritDoc} */
     protected HttpEntity createExtractionRequestBody(final String text) throws UnsupportedEncodingException {
-        final ArrayList<NameValuePair> parameters = new ArrayList<NameValuePair>(5);
-        parameters.add(new BasicNameValuePair("service", "tag"));
-        parameters.add(new BasicNameValuePair("lang", getProperty("Language")));
-        parameters.add(new BasicNameValuePair("text", text));
-        parameters.add(new BasicNameValuePair("rho", getProperty("Confidence")));
-        parameters.add(new BasicNameValuePair("epsilon", getProperty("Epsilon")));
-        parameters.add(new BasicNameValuePair("long_text", getProperty("Text Chunks")));
-        parameters.add(new BasicNameValuePair("dbpedia", "true"));
-        parameters.add(new BasicNameValuePair("include_abstract", "false"));
-        parameters.add(new BasicNameValuePair("app_id", getProperty("App ID")));
-        parameters.add(new BasicNameValuePair("app_key", getProperty("App key")));
-        return new UrlEncodedFormEntity(parameters);
+        final ParameterList parameters = new ParameterList();
+        parameters.add("service", "tag");
+        parameters.add("lang", getProperty("Language"));
+        parameters.add("text", text);
+        parameters.add("rho", getProperty("Confidence"));
+        parameters.add("epsilon", getProperty("Epsilon"));
+        parameters.add("long_text", getProperty("Text Chunks"));
+        parameters.add("dbpedia", "true");
+        parameters.add("include_abstract", "false");
+        parameters.add("app_id", getProperty("App ID"));
+        parameters.add("app_key", getProperty("App key"));
+        return parameters.toEntity();
     }
 
     /** {@inheritDoc} */
