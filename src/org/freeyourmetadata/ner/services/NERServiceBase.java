@@ -10,6 +10,7 @@ import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.util.HashMap;
+import java.util.Set;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -33,9 +34,7 @@ public abstract class NERServiceBase implements NERService {
     
     private final static Charset UTF8 = Charset.forName("UTF-8");
     
-    
     private final URI serviceUrl;
-    private final String[] propertyNames;
     private final HashMap<String, String> properties;
     private final URI documentationUri;
     
@@ -64,7 +63,6 @@ public abstract class NERServiceBase implements NERService {
      */
     public NERServiceBase(final URI serviceUrl, final String[] propertyNames, final URI documentationUri) {
         this.serviceUrl = serviceUrl;
-        this.propertyNames = propertyNames;
         this.documentationUri = documentationUri;
         
         properties = new HashMap<String, String>(propertyNames.length);
@@ -74,8 +72,8 @@ public abstract class NERServiceBase implements NERService {
     
     /** {@inheritDoc} */
     @Override
-    public String[] getPropertyNames() {
-        return propertyNames;
+    public Set<String> getPropertyNames() {
+        return properties.keySet();
     }
 
     /** {@inheritDoc} */

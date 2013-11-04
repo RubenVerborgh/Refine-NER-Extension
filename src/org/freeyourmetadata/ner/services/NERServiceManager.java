@@ -185,7 +185,8 @@ public class NERServiceManager {
                     final Iterator<String> settingNames = settings.keys();
                     while (settingNames.hasNext()) {
                         final String settingName = settingNames.next();
-                        service.setProperty(settingName, settings.getString(settingName));
+                        if (service.getPropertyNames().contains(settingName))
+                        	service.setProperty(settingName, settings.getString(settingName));
                     }
                 }
             }

@@ -1,6 +1,7 @@
 package org.freeyourmetadata.ner.services;
 
 import java.net.URI;
+import java.util.Set;
 
 /**
  * Interface for named-entity recognition services
@@ -19,7 +20,7 @@ public interface NERService {
      * Gets the names of supported properties of the service
      * @return The property names
      */
-    public String[] getPropertyNames();
+    public Set<String> getPropertyNames();
     
     /**
      * Gets the value of the specified property
