@@ -29,7 +29,8 @@ ExtractionDialog.prototype = {
                             updateStartStatus();
                           }}),
             $label = $('<label/>', { 'class': 'checkbox' })
-                        .append($service, service.name);
+                        .append($service, service.name),
+            $fieldset = $('<fieldset/>').append($label);
         if (!service.configured) {
           $service.attr('disabled', true);
           $label.addClass('disabled');
@@ -38,7 +39,25 @@ ExtractionDialog.prototype = {
                                          click: self.bound('showConfigurationDialog'),
                                        }));
         }
-        $services.append($('<li/>').append($label));
+        /* Load extraction settings */
+        if (service.configured && Object.keys(service.extractionSettings).length) {
+          var $settings = $('<ol/>').addClass('settings').appendTo($fieldset);
+          for (settingName in service.extractionSettings) {
+            var settingValue = service.extractionSettings[settingName],
+                $setting = $('<input/>', {
+                  type: 'text',
+                  name: service.name + '-' + settingName,
+                  id: service.name + '-' + settingName,
+                  value: settingValue
+                }),
+                $label = $('<label/>', {
+                  'for': service.name + '-' + settingName,
+                  'text': settingName
+                });
+            $settings.append($('<li/>').append($label).append($setting));
+          };
+        }
+        $services.append($('<li/>').append($fieldset));
       });
       if (callback)
         callback.apply(self);
@@ -62,10 +81,14 @@ ExtractionDialog.prototype = {
   },
   
   extract: function (services) {
-    Refine.postProcess("named-entity-recognition", "extractions",
-                       { column: this.column.name, services: services },
-                       {},
-                       { rowsChanged: true, modelsChanged: true });
+    var data = { column: this.column.name, services: services };
+
+    $('.dialog-frame.ner-extraction .settings input').each(function () {
+      data[$(this).attr('name')] = $(this).val();
+    });
+
+    Refine.postProcess('named-entity-recognition', 'extractions', data, {},
+                      { rowsChanged: true, modelsChanged: true });
     this.hide();
   },
   

@@ -5,6 +5,7 @@ import static org.freeyourmetadata.util.UriUtil.createUri;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Map;
 
 import org.apache.http.HttpEntity;
 import org.freeyourmetadata.util.ParameterList;
@@ -20,33 +21,33 @@ import org.json.JSONTokener;
 public class DataTXT extends NERServiceBase {
     private final static URI SERVICEBASEURL = createUri("https://api.dandelion.eu/datatxt/nex/v1");
     private final static URI DOCUMENTATIONURI = createUri("https://dandelion.eu/docs/api/datatxt/nex/v1/");
-    private final static String[] PROPERTYNAMES = { "App ID", "App key", "Language", "Confidence"};
+    private final static String[] SERVICESETTINGS = { "App ID", "App key"};
+    private final static String[] EXTRACTIONSETTINGS = {"Language", "Confidence"};
 
     /**
      * Creates a new dataTXT service connector
      */
     public DataTXT() {
-        super(SERVICEBASEURL, PROPERTYNAMES, DOCUMENTATIONURI);
-        setProperty("Language", "auto");
-        setProperty("Confidence", "0.6");
+        super(SERVICEBASEURL, DOCUMENTATIONURI, SERVICESETTINGS, EXTRACTIONSETTINGS);
+        setExtractionSettingDefault("Language", "auto");
+        setExtractionSettingDefault("Confidence", "0.6");
     }
 
     /** {@inheritDoc} */
     public boolean isConfigured() {
-        return getProperty("App ID").length() > 0
-        		&& getProperty("App key").length() > 0
-                && getProperty("Language").length() > 0
-                && getProperty("Confidence").length() > 0;
+        return getServiceSetting("App ID").length() > 0
+                && getServiceSetting("App key").length() > 0;
     }
 
     /** {@inheritDoc} */
-    protected HttpEntity createExtractionRequestBody(final String text) throws UnsupportedEncodingException {
+    protected HttpEntity createExtractionRequestBody(final String text, final Map<String, String> extractionSettings)
+    throws UnsupportedEncodingException {
         final ParameterList parameters = new ParameterList();
-        parameters.add("lang", getProperty("Language"));
+        parameters.add("lang", extractionSettings.get("Language"));
         parameters.add("text", text);
-        parameters.add("min_confidence", getProperty("Confidence"));
-        parameters.add("$app_id", getProperty("App ID"));
-        parameters.add("$app_key", getProperty("App key"));
+        parameters.add("min_confidence", getServiceSetting("Confidence"));
+        parameters.add("$app_id", getServiceSetting("App ID"));
+        parameters.add("$app_key", getServiceSetting("App key"));
         return parameters.toEntity();
     }
 

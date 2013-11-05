@@ -149,9 +149,18 @@ public class NERServiceManager {
                     /* Service settings object */
                     output.key("settings");
                     output.object();
-                    for(final String propertyName : service.getPropertyNames()) {
-                        output.key(propertyName);
-                        output.value(service.getProperty(propertyName));
+                    for(final String settingName : service.getServiceSettings()) {
+                        output.key(settingName);
+                        output.value(service.getServiceSetting(settingName));
+                    }
+                    output.endObject();
+
+                    /* Extraction settings object */
+                    output.key("extractionSettings");
+                    output.object();
+                    for(final String settingName : service.getExtractionSettings()) {
+                        output.key(settingName);
+                        output.value(service.getExtractionSettingDefault(settingName));
                     }
                     output.endObject();
                 }
@@ -185,8 +194,8 @@ public class NERServiceManager {
                     final Iterator<String> settingNames = settings.keys();
                     while (settingNames.hasNext()) {
                         final String settingName = settingNames.next();
-                        if (service.getPropertyNames().contains(settingName))
-                        	service.setProperty(settingName, settings.getString(settingName));
+                        if (service.getServiceSettings().contains(settingName))
+                        	service.setServiceSetting(settingName, settings.getString(settingName));
                     }
                 }
             }

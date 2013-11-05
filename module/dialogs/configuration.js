@@ -18,16 +18,23 @@ ConfigurationDialog.prototype = {
         var settings = service.settings,
             $title = $('<legend/>').text(service.name),
             $service = $('<fieldset/>').append($title),
-            $settings = $('<ol>').appendTo($service);
+            $settings = $('<ol>').appendTo($service),
+            settingKeys = Object.keys(settings);
         // Add all settings
-        Object.keys(settings).forEach(function (settingName) {
-          var id = encodeURIComponent(service.name + '-' + settingName);
-          $settings.append($('<li>')
-              .append($('<label>', { 'for': id, text: settingName }),
-                      $('<input>', { id: id, value: settings[settingName],
-                                     change: function (event) { settings[settingName] = $(event.target).val(); },
-                                   })));
-        });
+        if (settingKeys.length) {
+          settingKeys.forEach(function (settingName) {
+            var id = encodeURIComponent(service.name + '-' + settingName);
+            $settings.append($('<li>')
+                .append($('<label>', { 'for': id, text: settingName }),
+                        $('<input>', { id: id, value: settings[settingName],
+                                       change: function (event) { settings[settingName] = $(event.target).val(); },
+                                     })));
+          });
+        }
+        else {
+          $settings.append($('<li/>').append($('<em/>').text('This service requires no configuration.')))
+        }
+
         // Add configuration instructions
         if (service.documentation)
           $title.append(' ', $('<a/>', { 'class': 'documentation',

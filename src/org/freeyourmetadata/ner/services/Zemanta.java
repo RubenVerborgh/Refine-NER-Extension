@@ -5,6 +5,7 @@ import static org.freeyourmetadata.util.UriUtil.createUri;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Map;
 
 import org.apache.http.HttpEntity;
 import org.freeyourmetadata.util.ParameterList;
@@ -20,27 +21,29 @@ import org.json.JSONTokener;
 public class Zemanta extends NERServiceBase {
     private final static URI SERVICEBASEURL = createUri("http://papi.zemanta.com/services/rest/0.0/");
     private final static URI DOCUMENTATIONURI = createUri("http://freeyourmetadata.org/named-entity-extraction/zemanta/");
-    private final static String[] PROPERTYNAMES = { "API key" };
+    private final static String[] SERVICESETTINGS = { "API key" };
+    private final static String[] EXTRACTIONSETTINGS = {};
     
     /**
      * Creates a new Zemanta service connector
      */
     public Zemanta() {
-        super(SERVICEBASEURL, PROPERTYNAMES, DOCUMENTATIONURI);
+        super(SERVICEBASEURL, DOCUMENTATIONURI, SERVICESETTINGS, EXTRACTIONSETTINGS);
     }
     
     /** {@inheritDoc} */
     public boolean isConfigured() {
-        return getProperty("API key").length() > 0;
+        return getServiceSetting("API key").length() > 0;
     }
     
     /** {@inheritDoc} */
-    protected HttpEntity createExtractionRequestBody(final String text) throws UnsupportedEncodingException {
+    protected HttpEntity createExtractionRequestBody(final String text, final Map<String, String> extractionSettings)
+    throws UnsupportedEncodingException {
         final ParameterList parameters = new ParameterList();
         parameters.add("method", "zemanta.suggest_markup");
         parameters.add("format", "json");
         parameters.add("return_rdf_links", "1");
-        parameters.add("api_key", getProperty("API key"));
+        parameters.add("api_key", getServiceSetting("API key"));
         parameters.add("text", text);
         return parameters.toEntity();
     }

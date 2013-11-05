@@ -11,6 +11,7 @@ import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Set;
+import java.util.Map;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -35,66 +36,78 @@ public abstract class NERServiceBase implements NERService {
     private final static Charset UTF8 = Charset.forName("UTF-8");
     
     private final URI serviceUrl;
-    private final HashMap<String, String> properties;
+    private final HashMap<String, String> serviceSettings;
+    private final HashMap<String, String> extractionSettingsDefault;
     private final URI documentationUri;
-    
-    /**
-     * Creates a new named-entity recognition service base class
-     * @param propertyNames The names of supported properties
-     */
-    public NERServiceBase(final String[] propertyNames) {
-        this(null, propertyNames, null);
-    }
-    
+
     /**
      * Creates a new named-entity recognition service base class
      * @param serviceUrl The URL of the service (can be null if not fixed)
-     * @param propertyNames The names of supported properties
-     */
-    public NERServiceBase(final URI serviceUrl, final String[] propertyNames) {
-       this(serviceUrl, propertyNames, null);
-    }
-    
-    /**
-     * Creates a new named-entity recognition service base class
-     * @param serviceUrl The URL of the service (can be null if not fixed)
-     * @param propertyNames The names of supported properties
+     * @param serviceSettings The names of supported service settings
+     * @param extractionSettings The names of supported extraction settings
      * @param documentationUri The URI of the service's documentation
      */
-    public NERServiceBase(final URI serviceUrl, final String[] propertyNames, final URI documentationUri) {
+    public NERServiceBase(final URI serviceUrl, final URI documentationUri,
+    					  final String[] serviceSettings, final String[] extractionSettings) {
         this.serviceUrl = serviceUrl;
         this.documentationUri = documentationUri;
         
-        properties = new HashMap<String, String>(propertyNames.length);
-        for (String propertyName : propertyNames)
-            this.properties.put(propertyName, "");
+        this.serviceSettings = new HashMap<String, String>(serviceSettings.length);
+        for (String serviceSetting : serviceSettings)
+            this.serviceSettings.put(serviceSetting, "");
+
+        extractionSettingsDefault = new HashMap<String, String>(extractionSettings.length);
+        for (String extractionSetting : extractionSettings)
+        	extractionSettingsDefault.put(extractionSetting, "");
     }
     
     /** {@inheritDoc} */
     @Override
-    public Set<String> getPropertyNames() {
-        return properties.keySet();
+    public Set<String> getServiceSettings() {
+        return serviceSettings.keySet();
     }
 
     /** {@inheritDoc} */
     @Override
-    public String getProperty(final String name) {
-        return properties.get(name);
+    public String getServiceSetting(final String name) {
+        return serviceSettings.get(name);
     }
 
     /** {@inheritDoc} */
     @Override
-    public void setProperty(final String name, final String value) {
-        if (!properties.containsKey(name))
-            throw new IllegalArgumentException("The property " + name
+    public void setServiceSetting(final String name, final String value) {
+        if (!serviceSettings.containsKey(name))
+        	throw new IllegalArgumentException("The service setting " + name
                                                + " is invalid for " + getClass().getName() + ".");
-        properties.put(name, value == null ? "" : value);
+        serviceSettings.put(name, value == null ? "" : value);
+    }
+    
+    
+    /** {@inheritDoc} */
+    @Override
+    public Set<String> getExtractionSettings() {
+        return extractionSettingsDefault.keySet();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public String getExtractionSettingDefault(final String name) {
+        return extractionSettingsDefault.get(name);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void setExtractionSettingDefault(final String name, final String value) {
+        if (!extractionSettingsDefault.containsKey(name))
+            throw new IllegalArgumentException("The extraction setting " + name
+                                               + " is invalid for " + getClass().getName() + ".");
+        extractionSettingsDefault.put(name, value == null ? "" : value);
     }
     
     /** {@inheritDoc} */
     @Override
-    public NamedEntity[] extractNamedEntities(final String text) throws Exception {
-        final HttpUriRequest request = createExtractionRequest(text);
+    public NamedEntity[] extractNamedEntities(final String text, final Map<String, String> settings) throws Exception {
+        final HttpUriRequest request = createExtractionRequest(text, settings);
         return performExtractionRequest(request);
     }
     
@@ -129,12 +142,13 @@ public abstract class NERServiceBase implements NERService {
     /**
      * Creates a named-entity recognition request on the specified text
      * @param text The text to analyze
+     * @param settings The settings for the extraction
      * @return The created request
      * @throws Exception if the request cannot be created
      */
-    protected HttpUriRequest createExtractionRequest(final String text) throws Exception {
+    protected HttpUriRequest createExtractionRequest(final String text, final Map<String, String> settings) throws Exception {
         final URI requestUrl = createExtractionRequestUrl(text);
-        final HttpEntity body = createExtractionRequestBody(text);
+        final HttpEntity body = createExtractionRequestBody(text, settings);
         final HttpPost request = new HttpPost(requestUrl);
         request.setHeader("Accept", "application/json");
         request.setEntity(body);
@@ -153,10 +167,11 @@ public abstract class NERServiceBase implements NERService {
     /**
      * Creates the body for a named-entity recognition request on the specified text
      * @param text The text to analyze
+     * @param settings The settings for the extraction
      * @return The created body entity
      * @throws Exception if the request body cannot be created
      */
-    protected HttpEntity createExtractionRequestBody(final String text) throws Exception {
+    protected HttpEntity createExtractionRequestBody(final String text, final Map<String, String> settings) throws Exception {
         final ByteArrayOutputStream bodyOutput = new ByteArrayOutputStream();
         final JSONWriter bodyWriter = new JSONWriter(new OutputStreamWriter(bodyOutput, UTF8));
         try {

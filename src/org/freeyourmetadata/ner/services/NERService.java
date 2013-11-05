@@ -2,6 +2,7 @@ package org.freeyourmetadata.ner.services;
 
 import java.net.URI;
 import java.util.Set;
+import java.util.Map;
 
 /**
  * Interface for named-entity recognition services
@@ -11,34 +12,55 @@ public interface NERService {
     /**
      * Extracts named entities from the specified text
      * @param text The text
+     * @param settings The settings for the extraction
      * @return The extracted named entities
      * @throws Exception if the extraction fails
      */
-    public NamedEntity[] extractNamedEntities(String text) throws Exception;
+    public NamedEntity[] extractNamedEntities(String text, final Map<String, String> settings) throws Exception;
     
     /**
-     * Gets the names of supported properties of the service
-     * @return The property names
+     * Gets the names of supported settings of the service
+     * @return The setting names
      */
-    public Set<String> getPropertyNames();
+    public Set<String> getServiceSettings();
     
     /**
-     * Gets the value of the specified property
-     * @param name The property name
-     * @return The property value
+     * Gets the value of the specified setting
+     * @param name The setting name
+     * @return The setting value
      */
-    public String getProperty(String name);
+    public String getServiceSetting(String name);
     
     /**
-     * Sets the value of the specified property
-     * @param name The property name
-     * @param value The property value
+     * Sets the value of the specified setting
+     * @param name The setting name
+     * @param value The setting value
      */
-    public void setProperty(String name, String value);
+    public void setServiceSetting(String name, String value);
     
     /**
-     * Indicates whether the service has been configured
-     * @return <tt>true</tt> if the service has been configured
+     * Gets the names of supported extraction settings of the service
+     * @return The runtime setting names
+     */
+    public Set<String> getExtractionSettings();
+    
+    /**
+     * Gets the default value of the specified extraction setting
+     * @param name The setting name
+     * @return The setting value
+     */
+    public String getExtractionSettingDefault(String name);
+
+    /**
+     * Sets the default value of the specified extraction setting
+     * @param name The setting name
+     * @param value The setting value
+     */
+    public void setExtractionSettingDefault(String name, String value);
+    
+    /**
+     * Indicates whether all necessary service settings have been set
+     * @return <tt>true</tt> if all settings are set
      */
     public boolean isConfigured();
     

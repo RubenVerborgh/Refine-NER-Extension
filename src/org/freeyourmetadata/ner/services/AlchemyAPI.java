@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 
 import org.apache.http.HttpEntity;
 import org.freeyourmetadata.util.ParameterList;
@@ -23,7 +24,8 @@ import org.json.JSONTokener;
 public class AlchemyAPI extends NERServiceBase {
     private final static URI SERVICEBASEURL = createUri("http://access.alchemyapi.com/calls/text/TextGetRankedNamedEntities?outputMode=json");
     private final static URI DOCUMENTATIONURI = createUri("http://freeyourmetadata.org/named-entity-extraction/alchemyapi/");
-    private final static String[] PROPERTYNAMES = { "API key" };
+    private final static String[] SERVICESETTINGS = { "API key" };
+    private final static String[] EXTRACTIONSETTINGS = { };
     private final static HashSet<String> NONURIFIELDS = new HashSet<String>(
             Arrays.asList(new String[]{ "subType", "name", "website" }));
     
@@ -31,18 +33,19 @@ public class AlchemyAPI extends NERServiceBase {
      * Creates a new Alchemy service connector
      */
     public AlchemyAPI() {
-        super(SERVICEBASEURL, PROPERTYNAMES, DOCUMENTATIONURI);
+        super(SERVICEBASEURL, DOCUMENTATIONURI, SERVICESETTINGS, EXTRACTIONSETTINGS);
     }
     
     /** {@inheritDoc} */
     public boolean isConfigured() {
-        return getProperty("API key").length() > 0;
+        return getServiceSetting("API key").length() > 0;
     }
     
     /** {@inheritDoc} */
-    protected HttpEntity createExtractionRequestBody(final String text) throws UnsupportedEncodingException {
+    protected HttpEntity createExtractionRequestBody(final String text, final Map<String, String> extractionSettings)
+    throws UnsupportedEncodingException {
         final ParameterList parameters = new ParameterList();
-        parameters.add("apikey", getProperty("API key"));
+        parameters.add("apikey", getServiceSetting("API key"));
         parameters.add("text", text);
         return parameters.toEntity();
     }

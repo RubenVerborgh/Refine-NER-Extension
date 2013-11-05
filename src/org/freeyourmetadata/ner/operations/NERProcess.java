@@ -32,6 +32,7 @@ public class NERProcess extends LongRunningProcess implements Runnable {
     private final Project project;
     private final Column column;
     private final Map<String, NERService> services;
+    private final Map<String, Map<String,String>> settings;
     private final AbstractOperation parentOperation;
     private final JSONObject engineConfig;
     private final long historyEntryId;
@@ -41,17 +42,20 @@ public class NERProcess extends LongRunningProcess implements Runnable {
      * @param project The project
      * @param column The column on which named-entity recognition is performed
      * @param services The services that will be used for named-entity recognition
+     * @param settings The settings of the individual services
      * @param parentOperation The operation that creates this process
      * @param description The description of this operation
      * @param engineConfig The faceted browsing engine configuration
      */
-    protected NERProcess(final Project project, final Column column, final Map<String, NERService> services,
+    protected NERProcess(final Project project, final Column column,
+    		             final Map<String, NERService> services, final Map<String, Map<String, String>> settings,
                          final AbstractOperation parentOperation, final String description,
                          final JSONObject engineConfig) {
         super(description);
         this.project = project;
         this.column = column;
         this.services = services;
+        this.settings = settings;
         this.parentOperation = parentOperation;
         this.engineConfig = engineConfig;
         historyEntryId = HistoryEntry.allocateID();
@@ -123,8 +127,9 @@ public class NERProcess extends LongRunningProcess implements Runnable {
         // Create the extractors and corresponding threads
         final Extractor[] extractors = new Extractor[services.size()];
         int i = 0;
-        for (final NERService service : services.values()) {
-            final Extractor extractor = extractors[i++] = new Extractor(text, service);
+        for (final Map.Entry<String, NERService> service : services.entrySet()) {
+            final Extractor extractor = extractors[i++]
+              = new Extractor(text, service.getValue(), settings.get(service.getKey()));
             extractor.start();
         }
         
@@ -182,16 +187,19 @@ public class NERProcess extends LongRunningProcess implements Runnable {
         
         private final String text;
         private final NERService service;
+        private final Map<String,String> settings;
         private NamedEntity[] namedEntities;
         
         /**
          * Creates a new <tt>Extractor</tt>
          * @param text The text to analyze
          * @param service The service that will analyze the text
+         * @param settings The extraction settings
          */
-        public Extractor(final String text, final NERService service) {
+        public Extractor(final String text, final NERService service, final Map<String, String> settings) {
             this.text = text;
             this.service = service;
+            this.settings = settings;
             this.namedEntities = EMPTY_ENTITY_SET;
         }
         
@@ -207,7 +215,7 @@ public class NERProcess extends LongRunningProcess implements Runnable {
         @Override
         public void run() {
             try {
-                namedEntities = service.extractNamedEntities(text);
+                namedEntities = service.extractNamedEntities(text, settings);
             }
             catch (Exception error) {
                 LOGGER.error("The extractor failed", error);

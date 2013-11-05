@@ -1,5 +1,7 @@
 package org.freeyourmetadata.ner.commands;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.TreeMap;
 
 import javax.servlet.http.HttpServletRequest;
@@ -36,9 +38,19 @@ public class ExtractionCommand extends EngineDependentCommand {
         final Column column = project.columnModel.getColumnByName(columnName);
         final String[] serviceNames = request.getParameterValues("services[]");
         final TreeMap<String, NERService> services = new TreeMap<String, NERService>();
-        for (String serviceName : serviceNames)
-            services.put(serviceName, serviceManager.getService(serviceName));
+        final Map<String, Map<String, String>> settings = new HashMap<String, Map<String, String>>();
+        for (final String serviceName : serviceNames) {
+            NERService service = serviceManager.getService(serviceName);
+            services.put(serviceName, service);
+
+            final HashMap<String, String> serviceSettings = new HashMap<String, String>();
+            settings.put(serviceName, serviceSettings);
+            for (final String settingName : service.getExtractionSettings()) {
+            	final String settingValue = request.getParameter(serviceName + "-" + settingName);
+            	serviceSettings.put(settingName, settingValue == null ? "" : settingValue);
+            }
+        }
         
-        return new NEROperation(column, services, getEngineConfig(request));
+        return new NEROperation(column, services, settings, getEngineConfig(request));
     }
 }

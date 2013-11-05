@@ -4,6 +4,7 @@ import static org.freeyourmetadata.util.UriUtil.createUri;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.util.Map;
 
 import org.apache.http.HttpEntity;
 import org.freeyourmetadata.util.ParameterList;
@@ -18,22 +19,24 @@ import org.json.JSONTokener;
  */
 public class DBpediaSpotlight extends NERServiceBase implements NERService {
     private final static URI SERVICEBASEURL = createUri("http://spotlight.dbpedia.org/rest/annotate");
-    private final static String[] PROPERTYNAMES = { "Confidence", "Support" };
+    private final static String[] SERVICESETTINGS = {};
+    private final static String[] EXTRACTIONSETTINGS = { "Confidence", "Support" };
 
     /**
      * Creates a new DBpedia spotlight service connector
      */
     public DBpediaSpotlight() {
-        super(SERVICEBASEURL, PROPERTYNAMES);
-        setProperty("Confidence", "0.5");
-        setProperty("Support", "30");
+        super(SERVICEBASEURL, null, SERVICESETTINGS, EXTRACTIONSETTINGS);
+        setExtractionSettingDefault("Confidence", "0.5");
+        setExtractionSettingDefault("Support", "30");
     }
     
     /** {@inheritDoc} */
-    protected HttpEntity createExtractionRequestBody(final String text) throws UnsupportedEncodingException {
+    protected HttpEntity createExtractionRequestBody(final String text, final Map<String, String> extractionSettings)
+    		throws UnsupportedEncodingException {
         final ParameterList parameters = new ParameterList();
-        parameters.add("confidence", getProperty("Confidence"));
-        parameters.add("support", getProperty("Support"));
+        parameters.add("confidence", extractionSettings.get("Confidence"));
+        parameters.add("support", extractionSettings.get("Support"));
         parameters.add("text", text);
         return parameters.toEntity();
     }

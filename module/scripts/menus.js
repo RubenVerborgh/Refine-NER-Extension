@@ -5,7 +5,7 @@ ExtensionBar.addExtensionMenu({
   submenu: [
     {
       id   : "named-entity-recognition/configuration",
-      label: "Configure API keys...",
+      label: "Configure services...",
       click: dialogHandler(ConfigurationDialog),
     },
     { /* separator */ },

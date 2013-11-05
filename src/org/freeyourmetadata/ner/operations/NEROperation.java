@@ -2,6 +2,7 @@ package org.freeyourmetadata.ner.operations;
 
 import java.util.Properties;
 import java.util.SortedMap;
+import java.util.Map;
 
 import org.freeyourmetadata.ner.services.NERService;
 import org.json.JSONException;
@@ -22,17 +23,21 @@ import com.google.refine.util.JSONUtilities;
 public class NEROperation extends EngineDependentOperation {
     private final Column column;
     private final SortedMap<String, NERService> services;
-    
+    private final Map<String, Map<String, String>> settings;
+
     /**
      * Creates a new <tt>NEROperation</tt>
      * @param column The column on which named-entity recognition is performed
      * @param services The services that will be used for named-entity recognition
+     * @param settings The settings of the individual services
      * @param engineConfig The faceted browsing engine configuration
      */
-    public NEROperation(final Column column, final SortedMap<String, NERService> services, final JSONObject engineConfig) {
+    public NEROperation(final Column column, final SortedMap<String, NERService> services,
+                        final Map<String, Map<String, String>> settings, final JSONObject engineConfig) {
         super(engineConfig);
         this.column = column;
         this.services = services;
+        this.settings = settings;
     }
 
     /** {@inheritDoc} */
@@ -45,6 +50,20 @@ public class NEROperation extends EngineDependentOperation {
         writer.key("column"); writer.value(column.getName());
         writer.key("services");
         JSONUtilities.writeStringArray(writer, services.keySet().toArray(new String[services.size()]));
+
+        writer.key("parameters");
+        writer.object();
+        for (Map.Entry<String, Map<String,String>> serviceSettings : settings.entrySet()) {
+            writer.key(serviceSettings.getKey());
+            writer.object();
+            for (Map.Entry<String, String> setting : serviceSettings.getValue().entrySet()) {
+                writer.key(setting.getKey());
+                writer.value(setting.getValue());
+            }
+            writer.endObject();
+        }
+        writer.endObject();
+
         writer.endObject();
     }
     
@@ -57,6 +76,6 @@ public class NEROperation extends EngineDependentOperation {
     /** {@inheritDoc} */
     @Override
     public Process createProcess(final Project project, final Properties options) throws Exception {
-        return new NERProcess(project, column, services, this, getBriefDescription(project), getEngineConfig());
+        return new NERProcess(project, column, services, settings, this, getBriefDescription(project), getEngineConfig());
     }
 }
