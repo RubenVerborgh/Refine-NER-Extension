@@ -22,7 +22,7 @@ The Named-Entity Recognition extension has been developed as part of the [Free Y
 ## License
 This extension is provided free of charge under the MIT license.
 
-If this extension is used for research purposes, we kindly ask that you refer to the associated paper in your publications:
+If this extension is used for research, we kindly ask that you refer to the associated paper in your publications:
 <br>
 *van Hooland, S., De Wilde, M., Verborgh, R., Steiner, T., and Van de Walle, R.
-[Named-Entity Recognition: A Gateway Drug for Cultural Heritage Collections to the Linked Data Cloud?](http://freeyourmetadata.org/publications/named-entity-recognition-abstract.pdf) (submitted, 2012)*
+[Exploring Entity Recognition and Disambiguation for Cultural Heritage Collections](http://freeyourmetadata.org/publications/named-entity-recognition-abstract.pdf) (To appear in _Literary and Linguistics Computing_, 2014)*
