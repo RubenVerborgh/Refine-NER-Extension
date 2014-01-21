@@ -22,7 +22,7 @@ public class DataTXT extends NERServiceBase {
     private final static URI SERVICEBASEURL = createUri("https://api.dandelion.eu/datatxt/nex/v1");
     private final static URI DOCUMENTATIONURI = createUri("https://dandelion.eu/docs/api/datatxt/nex/v1/");
     private final static String[] SERVICESETTINGS = { "App ID", "App key"};
-    private final static String[] EXTRACTIONSETTINGS = {"Language", "Confidence"};
+    private final static String[] EXTRACTIONSETTINGS = {"Language", "Confidence", "Parse Hashtag", "Min Length"};
 
     /**
      * Creates a new dataTXT service connector
@@ -31,6 +31,8 @@ public class DataTXT extends NERServiceBase {
         super(SERVICEBASEURL, DOCUMENTATIONURI, SERVICESETTINGS, EXTRACTIONSETTINGS);
         setExtractionSettingDefault("Language", "auto");
         setExtractionSettingDefault("Confidence", "0.6");
+        setExtractionSettingDefault("Parse Hashtag", "false");
+        setExtractionSettingDefault("Min Length", "2");
     }
 
     /** {@inheritDoc} */
@@ -45,7 +47,9 @@ public class DataTXT extends NERServiceBase {
         final ParameterList parameters = new ParameterList();
         parameters.add("lang", extractionSettings.get("Language"));
         parameters.add("text", text);
-        parameters.add("min_confidence", getServiceSetting("Confidence"));
+        parameters.add("min_confidence", extractionSettings.get("Confidence"));
+        parameters.add("min_length", extractionSettings.get("Min Length"));
+        parameters.add("parse_hashtag", extractionSettings.get("Parse Hashtag"));
         parameters.add("$app_id", getServiceSetting("App ID"));
         parameters.add("$app_key", getServiceSetting("App key"));
         return parameters.toEntity();
