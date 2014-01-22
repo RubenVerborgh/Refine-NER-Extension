@@ -1,3 +1,4 @@
 *.class
 .settings
 module/MOD-INF/classes/
+test-output

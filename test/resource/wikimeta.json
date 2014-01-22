@@ -1,0 +1,42 @@
+{
+   "document":[
+      {
+         "Account":{
+            "key":"123456789",
+            "version":"1.0"
+         }
+      },
+      {
+         "words":[
+            {
+               "word":"Bienvenue",
+               "PartOfSPeech":"VER:pper"
+            },
+            {
+               "word":"Ã ",
+               "PartOfSPeech":"PRP"
+            },
+            {
+               "word":"Antibes",
+               "PartOfSPeech":"NAM"
+            },
+            {
+               "word":".",
+               "PartOfSPeech":"SENT"
+            }
+         ]
+      },
+      {
+         "Named Entities":[
+            {
+               "EN":"Antibes",
+               "type":"loc.admi",
+               "URI":"http://wikimeta.com/wapi/display.pl?query=Antibes&search=FR",
+               "LINKEDDATA":"http://www.dbpedia.org/resource/Antibes",
+               "position":"2",
+               "confidenceScore":"826.85"
+            }
+         ]
+      }
+   ]
+}

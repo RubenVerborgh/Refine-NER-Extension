@@ -30,8 +30,8 @@ import org.json.JSONTokener;
 public class WikiMetaAPI extends NERServiceBase {
     private final static URI SERVICEBASEURL = createUri("http://www.wikimeta.com/wapi/service");
     private final static URI DOCUMENTATIONURI = createUri("");
-    private final static String[] SERVICESETTINGS = { "API key", "Language", "Span", "Semantic tagging", "Textmining", "Treshold" };
-    private final static String[] EXTRACTIONSETTINGS = { };
+    private final static String[] SERVICESETTINGS = { "API key" };
+    private final static String[] EXTRACTIONSETTINGS = { "Language", "Span", "Semantic tagging", "Textmining", "Treshold" };
     
     /**
      * Creates a new WikiMeta service connector
@@ -70,14 +70,12 @@ public class WikiMetaAPI extends NERServiceBase {
     protected NamedEntity[] parseExtractionResponseEntity(final JSONTokener tokener) throws JSONException {
         // Check response status
         final JSONObject response = (JSONObject)tokener.nextValue();
-        if (!response.getJSONObject("document").isNull("error")) {
-        	throw new IllegalArgumentException("The WikiMetaAPI request did not succeed.");
-        }
+        final JSONArray document = response.getJSONArray("document");
         
-        final String lang = getServiceSetting("Language");
+        final String lang = getExtractionSettingDefault("Language");
         
         // Find all entities
-        final JSONArray entities = response.getJSONObject("document").getJSONArray("Named Entities");
+        final JSONArray entities = document.getJSONObject(2).getJSONArray("Named Entities");
         final NamedEntity[] results = new NamedEntity[entities.length()];
         for (int i = 0; i < results.length; i++) {
             final JSONObject entity = entities.getJSONObject(i);
