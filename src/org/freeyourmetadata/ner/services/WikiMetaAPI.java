@@ -67,9 +67,15 @@ public class WikiMetaAPI extends NERServiceBase {
     
     /** {@inheritDoc} */
     @Override
-    protected NamedEntity[] parseExtractionResponseEntity(final JSONTokener tokener) throws JSONException {
+    protected NamedEntity[] parseExtractionResponseEntity(final JSONTokener tokener) throws JSONException, IllegalArgumentException {
         // Check response status
-        final JSONObject response = (JSONObject)tokener.nextValue();
+    	// Somehow when call is invalid, over limit etc, json that is returned is also invalid
+    	final JSONObject response;
+    	try {
+            response = (JSONObject)tokener.nextValue();
+    	} catch (JSONException e) {
+    		throw new IllegalArgumentException("The WikiMetaAPI request did not succeed.");
+    	}
         final JSONArray document = response.getJSONArray("document");
         
         final String lang = getExtractionSettingDefault("Language");

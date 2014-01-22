@@ -34,7 +34,7 @@ public class WikiMetaAPITest extends APITest {
     }
 
 	@Test
-	public void parseExtractionResponseEntity() {
+	public void parseExtractionResponseEntityValid() {
 		InputStream stream = WikiMetaAPITest.class.getResourceAsStream("/wikimeta.json");
 		JSONTokener tokener = new JSONTokener(new InputStreamReader(stream));
 		NamedEntity[] result = null;
@@ -45,5 +45,21 @@ public class WikiMetaAPITest extends APITest {
 		}
 		Assert.assertNotNull(result);
 		Assert.assertEquals(result.length, 1);		
+	}
+	
+	@Test(expectedExceptions = IllegalArgumentException.class)
+	public void parseExtractionResponseEntityOverLimit() throws JSONException, IllegalArgumentException {
+		InputStream stream = WikiMetaAPITest.class.getResourceAsStream("/wikimeta_over_limit.json");
+		JSONTokener tokener = new JSONTokener(new InputStreamReader(stream));
+		api.parseExtractionResponseEntity(tokener);
+		Assert.fail();
+	}
+	
+	@Test(expectedExceptions = IllegalArgumentException.class)
+	public void parseExtractionResponseEntityUnknownUser() throws JSONException, IllegalArgumentException {
+		InputStream stream = WikiMetaAPITest.class.getResourceAsStream("/wikimeta_unknown_user.json");
+		JSONTokener tokener = new JSONTokener(new InputStreamReader(stream));
+		api.parseExtractionResponseEntity(tokener);
+		Assert.fail();
 	}
 }

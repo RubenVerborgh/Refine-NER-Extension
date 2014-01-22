@@ -1,0 +1,21 @@
+{
+   "document":[
+      {
+         "Account":{
+            "key":"1235754324668546",
+            "version":"1.0"
+         }
+      },
+      {
+         "error":[
+            {
+               "msg":"unknown user"
+            },
+            {
+               "details":{
+                  "key":"1235754324668546"
+               }
+            },
+
+         ]
+      }
