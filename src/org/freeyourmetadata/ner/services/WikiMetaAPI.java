@@ -29,9 +29,9 @@ import org.json.JSONTokener;
  */
 public class WikiMetaAPI extends NERServiceBase {
     private final static URI SERVICEBASEURL = createUri("http://www.wikimeta.com/wapi/service");
-    private final static URI DOCUMENTATIONURI = createUri("");
+    private final static URI DOCUMENTATIONURI = createUri("http://www.wikimeta.com/api.html");
     private final static String[] SERVICESETTINGS = { "API key" };
-    private final static String[] EXTRACTIONSETTINGS = { "Language", "Span", "Semantic tagging", "Textmining", "Treshold" };
+    private final static String[] EXTRACTIONSETTINGS = { "Language", "Span", "Treshold" };
     
     /**
      * Creates a new WikiMeta service connector
@@ -39,10 +39,8 @@ public class WikiMetaAPI extends NERServiceBase {
 	public WikiMetaAPI() {
         super(SERVICEBASEURL, DOCUMENTATIONURI, SERVICESETTINGS, EXTRACTIONSETTINGS);
         setExtractionSettingDefault("Treshold", "10");
-        setExtractionSettingDefault("Span", "1");
+        setExtractionSettingDefault("Span", "100");
         setExtractionSettingDefault("Language", "EN");
-        setExtractionSettingDefault("Semantic tagging", "0");
-        setExtractionSettingDefault("Textmining", "0");        
 	}
 	
 	/** {@inheritDoc} */
@@ -57,11 +55,10 @@ public class WikiMetaAPI extends NERServiceBase {
         final ParameterList parameters = new ParameterList();
         parameters.add("api", getServiceSetting("API key"));
         parameters.add("contenu", text);
-        parameters.add("treshold", getServiceSetting("Treshold"));
-        parameters.add("span", getServiceSetting("Span"));
-        parameters.add("lng", getServiceSetting("Language"));
-        parameters.add("semtag", getServiceSetting("Semantic tagging"));
-        parameters.add("textmining", getServiceSetting("Textmining"));
+        parameters.add("treshold", getExtractionSettingDefault("Treshold"));
+        parameters.add("span", getExtractionSettingDefault("Span"));
+        parameters.add("lng", getExtractionSettingDefault("Language"));
+        parameters.add("semtag", "1");
         return parameters.toEntity();
     }
     
@@ -82,23 +79,23 @@ public class WikiMetaAPI extends NERServiceBase {
         
         // Find all entities
         final JSONArray entities = document.getJSONObject(2).getJSONArray("Named Entities");
-        final NamedEntity[] results = new NamedEntity[entities.length()];
-        for (int i = 0; i < results.length; i++) {
+        final ArrayList<NamedEntity> results = new ArrayList<NamedEntity>();
+        for (int i = 0; i < entities.length(); i++) {
             final JSONObject entity = entities.getJSONObject(i);
-            final String entityText = entity.getString(lang);
+            final String entityText = entity.getString("EN");
             //final String type = entity.getString("type");
             final URI uri = createUri(entity.getString("URI"));
             //final URI linkedData = createUri(entity.getString("LINKEDDATA"));
             //final String position = entity.getString("position");
-            final Double score = Double.parseDouble(entity.getString("confidenceScore"));
-            
+            final Double score = entity.getString("confidenceScore").equals("") ? 0d : Double.parseDouble(entity.getString("confidenceScore"));
+
             // Put it in an array, ya never know
             final ArrayList<Disambiguation> disambiguations = new ArrayList<Disambiguation>();
-            disambiguations.add(new Disambiguation(entityText, uri, score));
-                        
-            // Create new named entity for the result
-            results[i] = new NamedEntity(entityText, disambiguations);
+            Disambiguation disambiguation = score.equals(0d) ? new Disambiguation(entityText, uri) : new Disambiguation(entityText, uri, score);
+            disambiguations.add(disambiguation);
+            results.add(new NamedEntity(entityText, disambiguations));
         }
-        return results;
+        
+        return results.toArray(new NamedEntity[results.size()]);
     }
 }

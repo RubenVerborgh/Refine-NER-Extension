@@ -44,7 +44,10 @@ public class WikiMetaAPITest extends APITest {
 			Assert.fail();
 		}
 		Assert.assertNotNull(result);
-		Assert.assertEquals(result.length, 1);		
+		Assert.assertEquals(result.length, 1);
+		Assert.assertEquals(result[0].getDisambiguations().length, 1);
+		Assert.assertEquals(result[0].getDisambiguations()[0].getScore(), new Double("826.85"));
+
 	}
 	
 	@Test(expectedExceptions = IllegalArgumentException.class)
