@@ -39,10 +39,14 @@ public class ExtractionCommand extends EngineDependentCommand {
         final String[] serviceNames = request.getParameterValues("services[]");
         final TreeMap<String, NERService> services = new TreeMap<String, NERService>();
         final Map<String, Map<String, String>> settings = new HashMap<String, Map<String, String>>();
+        
+        // Instantiate all needed services
         for (final String serviceName : serviceNames) {
-            NERService service = serviceManager.getService(serviceName);
+            // Create the service
+            final NERService service = serviceManager.getService(serviceName);
             services.put(serviceName, service);
 
+            // Apply the service settings
             final HashMap<String, String> serviceSettings = new HashMap<String, String>();
             settings.put(serviceName, serviceSettings);
             for (final String settingName : service.getExtractionSettings()) {

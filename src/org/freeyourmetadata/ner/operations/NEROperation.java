@@ -1,14 +1,18 @@
 package org.freeyourmetadata.ner.operations;
 
+import java.util.HashMap;
 import java.util.Properties;
 import java.util.SortedMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.freeyourmetadata.ner.services.NERService;
+import org.freeyourmetadata.ner.services.NERServiceManager;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONWriter;
 
+import com.google.refine.model.AbstractOperation;
 import com.google.refine.model.Column;
 import com.google.refine.model.Project;
 import com.google.refine.operations.EngineDependentOperation;
@@ -38,6 +42,42 @@ public class NEROperation extends EngineDependentOperation {
         this.column = column;
         this.services = services;
         this.settings = settings;
+    }
+
+    /**
+     * Recreates a <tt>NEROperation</tt> from a JSON object
+     * @param project The project for which the operation is created
+     * @param operation A JSON representation of the operation
+     * @return A new <tt>NEROperation</tt>
+     * @throws Exception when the operation cannot be created
+     */
+    static public AbstractOperation reconstruct(final Project project, final JSONObject operation) throws Exception {
+        final JSONObject engineConfig = operation.getJSONObject("engineConfig");
+        final JSONObject parameters = operation.getJSONObject("parameters");
+        final NERServiceManager serviceManager = new NERServiceManager();
+        final TreeMap<String, NERService> services = new TreeMap<String, NERService>();
+        final Map<String, Map<String, String>> settings = new HashMap<String, Map<String, String>>();
+        
+        // Instantiate all needed services
+        for (final String serviceName : JSONUtilities.getStringArray(operation, "services")) {
+            // Create the service
+            final NERService service = serviceManager.getService(serviceName);
+            services.put(serviceName, service);
+            
+            // Apply the service settings
+            final Map<String, String> serviceSettings = new TreeMap<String, String>();
+            final JSONObject serviceSetttingsJson = parameters.getJSONObject(serviceName);
+            for (final String settingName : service.getExtractionSettings()) {
+                try {
+                    serviceSettings.put(settingName, serviceSetttingsJson.getString(settingName));
+                }
+                catch (JSONException e) { }
+            }
+            settings.put(serviceName, serviceSettings);
+        }
+
+        return new NEROperation(project.columnModel.getColumnByName(operation.getString("column")),
+                                services, settings, engineConfig);
     }
 
     /** {@inheritDoc} */

@@ -16,6 +16,7 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.json.JSONWriter;
 
+import com.google.refine.RefineServlet;
 import com.google.refine.util.JSONUtilities;
 
 /**
@@ -24,6 +25,7 @@ import com.google.refine.util.JSONUtilities;
  */
 public class NERServiceManager {
     private final static Logger LOGGER = Logger.getLogger(NERServiceManager.class);
+    private final static File CACHEFOLDER = new RefineServlet().getCacheDir("ner-extension");
     
     private final TreeMap<String, NERService> services;
     private final File settingsFile;
@@ -45,6 +47,16 @@ public class NERServiceManager {
         // Then, load the user's settings from the specified file (if it exists)
         if (settingsFile.exists())
             updateFrom(new FileReader(settingsFile));
+    }
+    
+    /**
+     * Creates a new <tt>NERServiceManager</tt> with the default settings file location
+     * @throws IOException if the settings file cannot be read
+     * @throws JSONException if the settings file contains invalid JSON
+     * @throws ClassNotFoundException if a service cannot be instantiated
+     */
+    public NERServiceManager() throws IOException, JSONException, ClassNotFoundException {
+        this(new File(CACHEFOLDER, "services.json"));
     }
     
     /**

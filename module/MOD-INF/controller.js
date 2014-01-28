@@ -9,8 +9,7 @@ var logger = Packages.org.slf4j.LoggerFactory.getLogger("NER-extension"),
 /* Initialize the extension. */
 function init() {
   logger.info("Initializing service manager");
-  var cacheFolder = new refineServlet().getCacheDir("ner-extension");
-  var serviceManager = new services.NERServiceManager(new File(cacheFolder + "/services.json"));
+  var serviceManager = new services.NERServiceManager();
   
   logger.info("Initializing commands, changes, and operations");
   refineServlet.registerCommand(module, "services", new commands.ServicesCommand(serviceManager));
