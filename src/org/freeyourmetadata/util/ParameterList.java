@@ -28,6 +28,6 @@ public class ParameterList extends ArrayList<NameValuePair> {
      * @throws UnsupportedEncodingException if the encoding is not supported
      */
     public UrlEncodedFormEntity toEntity() throws UnsupportedEncodingException {
-        return new UrlEncodedFormEntity(this);
+        return new UrlEncodedFormEntity(this, "UTF-8");
     }
 }
