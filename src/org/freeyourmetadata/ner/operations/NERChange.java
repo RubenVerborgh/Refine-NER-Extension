@@ -140,8 +140,14 @@ public class NERChange implements Change {
                 /* Service results array */
                 final JSONArray entitiesJson = serviceResultsJson.getJSONArray(j);
                 final NamedEntity[] entities = serviceResults[j] = new NamedEntity[serviceResultsJson.length()];
-                for (int k = 0; k < entities.length; k++)
-                    entities[k] = new NamedEntity(entitiesJson.getJSONObject(k));
+                for (int k = 0; k < entities.length; k++) {
+                    try {
+                        entities[k] = new NamedEntity(entitiesJson.getJSONObject(k));
+                    }
+                    catch (JSONException e) {
+                        entities[k] = new NamedEntity("");
+                    }
+                }
             }
         }
         
