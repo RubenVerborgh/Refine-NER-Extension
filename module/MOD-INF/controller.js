@@ -14,6 +14,12 @@ function init() {
   logger.info("Initializing commands");
   register("services", new commands.ServicesCommand(serviceManager));
   register("extractions", new commands.ExtractionCommand(serviceManager));
+
+  refineServlet.registerClassMapping(
+    "com.google.refine.model.changes.DataExtensionChange",
+    "org.freeyourmetadata.ner.operations.NERChange"
+  );
+  refineServlet.cacheClass(Packages.org.freeyourmetadata.ner.operations.NERChange);
   
   logger.info("Initializing client resources");
   var resourceManager = Packages.com.google.refine.ClientSideResourceManager;
