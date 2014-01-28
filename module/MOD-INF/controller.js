@@ -1,6 +1,7 @@
 var logger = Packages.org.slf4j.LoggerFactory.getLogger("NER-extension"),
     File = Packages.java.io.File,
     refineServlet = Packages.com.google.refine.RefineServlet,
+    operationRegistry = Packages.com.google.refine.operations.OperationRegistry,
     ner = Packages.org.freeyourmetadata.ner,
     services = ner.services,
     commands = ner.commands;
@@ -11,16 +12,16 @@ function init() {
   var cacheFolder = new refineServlet().getCacheDir("ner-extension");
   var serviceManager = new services.NERServiceManager(new File(cacheFolder + "/services.json"));
   
-  logger.info("Initializing commands");
-  register("services", new commands.ServicesCommand(serviceManager));
-  register("extractions", new commands.ExtractionCommand(serviceManager));
-
+  logger.info("Initializing commands, changes, and operations");
+  refineServlet.registerCommand(module, "services", new commands.ServicesCommand(serviceManager));
+  refineServlet.registerCommand(module, "extractions", new commands.ExtractionCommand(serviceManager));
   refineServlet.registerClassMapping(
     "com.google.refine.model.changes.DataExtensionChange",
     "org.freeyourmetadata.ner.operations.NERChange"
   );
   refineServlet.cacheClass(Packages.org.freeyourmetadata.ner.operations.NERChange);
-  
+  operationRegistry.registerOperation(module, "ner", Packages.org.freeyourmetadata.ner.operations.NEROperation);
+
   logger.info("Initializing client resources");
   var resourceManager = Packages.com.google.refine.ClientSideResourceManager;
   resourceManager.addPaths(
@@ -46,6 +47,3 @@ function init() {
   );
 }
 
-function register(path, command) {
-  refineServlet.registerCommand(module, path, command);
-}
