@@ -17,6 +17,7 @@ import org.json.JSONTokener;
 /**
  * dataTXT service connector
  * @author Stefano Parmesan
+ * @author Giuliano Tortoreto
  */
 public class DataTXT extends NERServiceBase {
     private final static URI SERVICEBASEURL = createUri("https://api.dandelion.eu/datatxt/nex/v1");
@@ -77,5 +78,12 @@ public class DataTXT extends NERServiceBase {
         }
         
         return results;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    protected Exception extractError(final JSONTokener tokener) throws JSONException {
+    	final JSONObject response = (JSONObject)tokener.nextValue();
+    	return response.has("message") ? new Exception(response.getString("message")) : null;
     }
 }

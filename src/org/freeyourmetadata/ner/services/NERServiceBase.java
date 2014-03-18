@@ -15,7 +15,6 @@ import java.util.Map;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.InputStreamEntity;
@@ -130,11 +129,9 @@ public abstract class NERServiceBase implements NERService {
      */
     protected NamedEntity[] performExtractionRequest(final HttpUriRequest request) throws Exception {
         final DefaultHttpClient httpClient = new DefaultHttpClient();
-        final HttpResponse response = httpClient.execute(request);
-        if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK)
-            throw new IllegalStateException(
-                    String.format("The extraction request returned status code %d instead of %s.",
-                                  response.getStatusLine().getStatusCode(), HttpStatus.SC_OK));
+        final Exception error = extractError(response);
+        if (error != null) throw error;
+        
         final HttpEntity responseEntity = response.getEntity();
         return parseExtractionResponseEntity(responseEntity);
     }
@@ -232,5 +229,29 @@ public abstract class NERServiceBase implements NERService {
         catch (UnsupportedEncodingException error) {
             throw new RuntimeException(error);
         }
+    }
+    
+    /**
+     * Extracts a possible error from the HTTP response
+     * @param response The response
+     * @return The extracted error, or <tt>null</tt> if none exists
+     */
+    protected Exception extractError(final HttpResponse response) throws Exception {
+        if (response.getStatusLine().getStatusCode() < 300) return null;
+        try {
+            return extractError(new JSONTokener(new InputStreamReader(response.getEntity().getContent())));
+        }
+        catch (Exception error) {
+        	return new Exception(String.format("HTTP error %d", response.getStatusLine().getStatusCode()));
+        }
+    }
+    
+    /**
+     * Extracts a possible error from the HTTP response body
+     * @param tokener The tokener containing the response
+     * @return The extracted error, or <tt>null</tt> if none exists
+     */
+    protected Exception extractError(final JSONTokener tokener) throws JSONException {
+    	throw new UnsupportedOperationException();
     }
 }

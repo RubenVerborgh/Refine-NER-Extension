@@ -6,8 +6,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
+import org.freeyourmetadata.ner.services.ExtractionResult;
 import org.freeyourmetadata.ner.services.NERService;
-import org.freeyourmetadata.ner.services.NamedEntity;
 import org.json.JSONObject;
 
 import com.google.refine.browsing.Engine;
@@ -27,8 +27,7 @@ import com.google.refine.process.LongRunningProcess;
  */
 public class NERProcess extends LongRunningProcess implements Runnable {
     private final static Logger LOGGER = Logger.getLogger(NERProcess.class);
-    private final static NamedEntity[][] EMPTY_RESULT_SET = new NamedEntity[0][];
-    
+
     private final Project project;
     private final Column column;
     private final Map<String, NERService> services;
@@ -66,7 +65,7 @@ public class NERProcess extends LongRunningProcess implements Runnable {
     public void run() {
         final int columnIndex = project.columnModel.getColumnIndexByName(column.getName()) + 1;
         final String[] serviceNames = services.keySet().toArray(new String[services.size()]);
-        final NamedEntity[][][] namedEntities = performExtraction();
+        final ExtractionResult[][] namedEntities = performExtraction();
         
         if (!_canceled) {
             project.history.addEntry(new HistoryEntry(historyEntryId, project, _description, parentOperation,
@@ -79,7 +78,7 @@ public class NERProcess extends LongRunningProcess implements Runnable {
      * Performs named-entity extraction on all rows
      * @return The extracted named entities per row and service
      */
-    protected NamedEntity[][][] performExtraction() {
+    protected ExtractionResult[][] performExtraction() {
         // Count all rows
         final int rowsTotal = project.rows.size();
         // Get the cell index of the column in which to perform entity extraction
@@ -89,11 +88,9 @@ public class NERProcess extends LongRunningProcess implements Runnable {
         final int rowsFiltered = filteredRowIndices.size();
         
         // Go through each row and extract entities if the row is part of the filter
-        final NamedEntity[][][] namedEntities = new NamedEntity[rowsTotal][][];
+        final ExtractionResult[][] extractionResults = new ExtractionResult[rowsTotal][];
         int rowsProcessed = 0;
         for (int rowIndex = 0; rowIndex < rowsTotal; rowIndex++) {
-            // Initialize to the empty result set, in case no entities are extracted
-            namedEntities[rowIndex] = EMPTY_RESULT_SET;
             // If the row is part of the filter, extract entities
             if (filteredRowIndices.contains(rowIndex)) {
                 final Row row = project.rows.get(rowIndex);
@@ -101,19 +98,19 @@ public class NERProcess extends LongRunningProcess implements Runnable {
                 final Cell cell = row.getCell(cellIndex);
                 final Serializable cellValue = cell == null ? null : cell.value;
                 final String text = cellValue == null ? "" : cellValue.toString().trim();
+                
                 // Perform extraction if the text is not empty
-                if (text.length() > 0) {
-                    LOGGER.info(String.format("Extracting named entities in column %s on row %d of %d.",
-                                              column.getName(), rowsProcessed + 1, rowsFiltered));
-                    namedEntities[rowIndex] = performExtraction(text);
-                }
+                LOGGER.info(String.format("Extracting named entities in column %s on row %d of %d.",
+      				  column.getName(), rowsProcessed + 1, rowsFiltered));
+                extractionResults[rowIndex] = text.isEmpty() ? new ExtractionResult[0] : performExtraction(text);
+                
                 _progress = 100 * ++rowsProcessed / rowsFiltered;
             }
             // Exit directly if the process has been cancelled
             if (_canceled)
                 return null;
         }
-        return namedEntities;
+        return extractionResults;
     }
 
     
@@ -122,7 +119,7 @@ public class NERProcess extends LongRunningProcess implements Runnable {
      * @param text The text
      * @return The extracted named entities per service
      */
-    protected NamedEntity[][] performExtraction(final String text) {
+    protected ExtractionResult[] performExtraction(final String text) {
         // The execution of the services happens in parallel.
         // Create the extractors and corresponding threads
         final Extractor[] extractors = new Extractor[services.size()];
@@ -134,7 +131,7 @@ public class NERProcess extends LongRunningProcess implements Runnable {
         }
         
         // Wait for all threads to finish and collect their results
-        final NamedEntity[][] extractions = new NamedEntity[extractors.length][];
+        final ExtractionResult[] extractionResults = new ExtractionResult[extractors.length];
         for (i = 0; i < extractors.length; i++) {
             try {
                 extractors[i].join();
@@ -142,9 +139,9 @@ public class NERProcess extends LongRunningProcess implements Runnable {
             catch (InterruptedException error) {
                 LOGGER.error("The extractor was interrupted", error);
             }
-            extractions[i] = extractors[i].getNamedEntities();
+            extractionResults[i] = extractors[i].getExtractionResult();
         }
-        return extractions;
+        return extractionResults;
     }
     
     /**
@@ -183,13 +180,11 @@ public class NERProcess extends LongRunningProcess implements Runnable {
      * Thread that executes a named-entity recognition service
      */
     protected static class Extractor extends Thread {
-        private final static NamedEntity[] EMPTY_ENTITY_SET = new NamedEntity[0];
-        
         private final String text;
         private final NERService service;
         private final Map<String,String> settings;
-        private NamedEntity[] namedEntities;
-        
+        private ExtractionResult extractionResult;
+
         /**
          * Creates a new <tt>Extractor</tt>
          * @param text The text to analyze
@@ -200,25 +195,24 @@ public class NERProcess extends LongRunningProcess implements Runnable {
             this.text = text;
             this.service = service;
             this.settings = settings;
-            this.namedEntities = EMPTY_ENTITY_SET;
         }
         
         /**
-         * Gets the named entities the service extracted from the text
+         * Gets the result of the named-entity recognition service
          * @return The extracted named entities
          */
-        public NamedEntity[] getNamedEntities() {
-            return namedEntities;
+        public ExtractionResult getExtractionResult() {
+            return extractionResult;
         }
         
         /** {@inheritDoc} */
         @Override
         public void run() {
             try {
-                namedEntities = service.extractNamedEntities(text, settings);
+                extractionResult = new ExtractionResult(service.extractNamedEntities(text, settings));
             }
             catch (Exception error) {
-                LOGGER.error("The extractor failed", error);
+                extractionResult = new ExtractionResult(error);
             }
         }
     }

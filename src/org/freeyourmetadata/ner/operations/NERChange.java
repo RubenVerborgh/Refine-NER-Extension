@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Properties;
 
 import org.apache.commons.lang.ArrayUtils;
+import org.freeyourmetadata.ner.services.ExtractionResult;
 import org.freeyourmetadata.ner.services.NamedEntity;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -18,6 +19,7 @@ import org.json.JSONTokener;
 import org.json.JSONWriter;
 
 import com.google.refine.history.Change;
+import com.google.refine.model.Cell;
 import com.google.refine.model.Project;
 import com.google.refine.model.Row;
 import com.google.refine.model.changes.CellAtRow;
@@ -33,19 +35,20 @@ import com.google.refine.util.Pool;
 public class NERChange implements Change {
     private final int columnIndex;
     private final String[] serviceNames;
-    private final NamedEntity[][][] namedEntities;
+    private final ExtractionResult[][] extractionResults;
     private final List<Integer> addedRowIds;
     
     /**
      * Creates a new <tt>NERChange</tt>
      * @param columnIndex The index of the column used for named-entity recognition
      * @param serviceNames The names of the used services
-     * @param namedEntities The extracted named entities per row and service
+     * @param extractionResults The results of named-entity extraction per row and service
      */
-    public NERChange(final int columnIndex, final String[] serviceNames, final NamedEntity[][][] namedEntities) {
+    public NERChange(final int columnIndex, final String[] serviceNames,
+    				 final ExtractionResult[][] extractionResults) {
         this.columnIndex = columnIndex;
         this.serviceNames = serviceNames;
-        this.namedEntities = namedEntities;
+        this.extractionResults = extractionResults;
         this.addedRowIds = new ArrayList<Integer>();
     }
 
@@ -79,19 +82,28 @@ public class NERChange implements Change {
             json.key("column"); json.value(columnIndex);
             json.key("services"); JSONUtilities.writeStringArray(json, serviceNames);
             json.key("entities");
-            /* Named entities nested array */
+            /* Nested array of extraction results */
             {
-                /* Rows array */
+            	/* Array of results per row */
                 json.array();
-                for (final NamedEntity[][] row : namedEntities) {
-                    /* Services array */
+                for (final ExtractionResult[] rowResults : extractionResults) {
+                	/* Array of results per service on this row */
                     json.array();
-                    /* Service results array */
-                    for (final NamedEntity[] entities : row) {
-                        json.array();
-                        for (final NamedEntity entity : entities)
-                            entity.writeTo(json);
-                        json.endArray();
+                    /* Array of results for this service */
+                    for (final ExtractionResult extractionResult : rowResults) {
+                    	/* Array of entities */
+                    	if (!extractionResult.hasError()) {
+	                        json.array();
+	                        for (final NamedEntity entity : extractionResult.getNamedEntities())
+	                            entity.writeTo(json);
+	                        json.endArray();
+                    	}
+                    	/* Error object */
+                    	else {
+                    		json.object();
+                    		json.key("error"); json.value(extractionResult.getExtractionError().message);
+                    		json.endObject();
+                    	}
                     }
                     json.endArray();
                 }
@@ -128,31 +140,36 @@ public class NERChange implements Change {
         final int columnIndex = changeJson.getInt("column");
         final String[] serviceNames = JSONUtilities.getStringArray(changeJson, "services");
         
-        /* Named entities nested array */
+        /* Nested array of extraction results */
         final JSONArray namedEntitiesJson = changeJson.getJSONArray("entities");
-        final NamedEntity[][][] namedEntities = new NamedEntity[namedEntitiesJson.length()][][];
-        /* Rows array */
-        for (int i = 0; i < namedEntities.length; i++) {
-            /* Services array */
-            final JSONArray serviceResultsJson = namedEntitiesJson.getJSONArray(i);
-            final NamedEntity[][] serviceResults = namedEntities[i] = new NamedEntity[serviceResultsJson.length()][];
-            for (int j = 0; j < serviceResults.length; j++) {
-                /* Service results array */
-                final JSONArray entitiesJson = serviceResultsJson.getJSONArray(j);
-                final NamedEntity[] entities = serviceResults[j] = new NamedEntity[serviceResultsJson.length()];
-                for (int k = 0; k < entities.length; k++) {
-                    try {
-                        entities[k] = new NamedEntity(entitiesJson.getJSONObject(k));
-                    }
-                    catch (JSONException e) {
-                        entities[k] = new NamedEntity("");
-                    }
-                }
+        final ExtractionResult[][] extractionResults = new ExtractionResult[namedEntitiesJson.length()][];
+        /* Array of results per row */
+        for (int i = 0; i < extractionResults.length; i++) {
+            /* Array of results per service on this row */
+            final JSONArray rowResultsJson = namedEntitiesJson.getJSONArray(i);
+            final ExtractionResult[] rowResults = new ExtractionResult[rowResultsJson.length()];
+            for (int j = 0; j < rowResults.length; j++) {
+            	final JSONObject error = rowResultsJson.optJSONObject(j);
+            	if (error == null) {
+            		/* Array of entities */
+            		final JSONArray entitiesJson = rowResultsJson.getJSONArray(j);
+	                final NamedEntity[] entities = new NamedEntity[rowResultsJson.length()];
+	                for (int k = 0; k < entities.length; k++) {
+	                    try { entities[k] = new NamedEntity(entitiesJson.getJSONObject(k)); }
+	                    catch (JSONException e) { entities[k] = new NamedEntity(""); }
+	                }
+	                rowResults[j] = new ExtractionResult(entities);
+            	}
+		        else {
+		        	/* Error object */
+		        	rowResults[j] = new ExtractionResult(new Exception(error.getString("error")));
+		        }
             }
+            extractionResults[i] = rowResults;
         }
         
         /* Reconstruct change object */
-        final NERChange change = new NERChange(columnIndex, serviceNames, namedEntities);
+        final NERChange change = new NERChange(columnIndex, serviceNames, extractionResults);
         for (final int addedRowId : JSONUtilities.getIntArray(changeJson, "addedRows"))
             change.addedRowIds.add(addedRowId);
         return change;
@@ -212,33 +229,40 @@ public class NERChange implements Change {
         // Add the extracted named entities to all rows, creating new ones as necessary
         int rowNumber = 0;
         addedRowIds.clear();
-        for (final NamedEntity[][] serviceEntities : namedEntities) {
+        for (final ExtractionResult[] rowResults : extractionResults) {
             // Determine the maximum number of named entities per service
             int maxEntities = 0;
-            for (final NamedEntity[] entities : serviceEntities)
-                maxEntities = Math.max(maxEntities, entities.length);
-            // Skip this row if no named entities were found
-            if (maxEntities == 0) {
-                rowNumber++;
-                continue;
+            for (int col = 0; col < rowResults.length; col++) {
+            	int neededCells = rowResults[col].hasError() ? 1 : rowResults[col].getNamedEntities().length;
+                maxEntities = Math.max(maxEntities, neededCells);
             }
-            // Create new blank rows if named entities don't fit on a single line
-            for (int i = 1; i < maxEntities; i++) {
-                final Row entityRow = new Row(minRowSize);
-                final int entityRowId = rowNumber + i;
-                for (int j = 0; j < minRowSize; j++)
-                    entityRow.cells.add(null);
-                rows.add(entityRowId, entityRow);
-                addedRowIds.add(entityRowId);
-            }
-            // Place all named entities
-            for (int c = 0; c < serviceEntities.length; c++) {
-                final NamedEntity[] entities = serviceEntities[c];
-                for (int r = 0; r < entities.length; r++)
-                    rows.get(rowNumber + r).cells.set(cellIndexes[c], entities[r].toCell());
+            if (maxEntities > 0) {
+	            // Create new blank rows if the results don't fit on a single line
+	            for (int i = 1; i < maxEntities; i++) {
+	                final Row entityRow = new Row(minRowSize);
+	                final int entityRowId = rowNumber + i;
+	                for (int j = 0; j < minRowSize; j++)
+	                    entityRow.cells.add(null);
+	                rows.add(entityRowId, entityRow);
+	                addedRowIds.add(entityRowId);
+	            }
+	            // Place all results
+	            for (int col = 0; col < rowResults.length; col++) {
+	            	// Place each found entity on a row
+	            	if (!rowResults[col].hasError()) {
+		                final NamedEntity[] entities = rowResults[col].getNamedEntities();
+		                for (int r = 0; r < entities.length; r++)
+		                    rows.get(rowNumber + r).cells.set(cellIndexes[col], entities[r].toCell());
+	            	}
+	            	// Place an error only on the first row
+	            	else {
+	            		final Cell errorCell = new Cell(rowResults[col].getExtractionError(), null);
+	            		rows.get(rowNumber).cells.set(cellIndexes[col], errorCell);
+	            	}
+	            }
             }
             // Advance to the next original row
-            rowNumber += maxEntities;
+            rowNumber += Math.max(1, maxEntities);
         }
     }
     
