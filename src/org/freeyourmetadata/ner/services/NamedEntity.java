@@ -30,7 +30,7 @@ public class NamedEntity {
      * @param extractedText The label of the entity
      */
     public NamedEntity(final String extractedText) {
-        this(extractedText, new Disambiguation[] {new Disambiguation(extractedText)});
+        this(extractedText, new Disambiguation[] { new Disambiguation(extractedText) });
     }
 
     /**
@@ -40,6 +40,16 @@ public class NamedEntity {
      */
     public NamedEntity(final String extractedText, final URI uri) {
         this(extractedText, new Disambiguation[] { new Disambiguation(extractedText, uri) });
+    }
+    
+    /**
+     * Creates a new named entity with a single URI
+     * @param extractedText The label of the entity
+     * @param uri The URI of the entity
+     * @param score The confidence score of the entity
+     */
+    public NamedEntity(final String extractedText, final URI uri, double score) {
+        this(extractedText, new Disambiguation[] { new Disambiguation(extractedText, uri, score) });
     }
 
     /**

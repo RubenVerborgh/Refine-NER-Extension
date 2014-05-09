@@ -2,5 +2,6 @@
     {"name": "AlchemyAPI",        "class": "org.freeyourmetadata.ner.services.AlchemyAPI"},
     {"name": "dataTXT",           "class": "org.freeyourmetadata.ner.services.DataTXT"},
     {"name": "DBpedia Spotlight", "class": "org.freeyourmetadata.ner.services.DBpediaSpotlight"},
+    {"name": "WikiMeta",          "class": "org.freeyourmetadata.ner.services.WikiMeta"},
     {"name": "Zemanta",           "class": "org.freeyourmetadata.ner.services.Zemanta"}
 ]
