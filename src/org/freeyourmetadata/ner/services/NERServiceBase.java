@@ -151,6 +151,7 @@ public abstract class NERServiceBase implements NERService {
         final HttpEntity body = createExtractionRequestBody(text, settings);
         final HttpPost request = new HttpPost(requestUrl);
         request.setHeader("Accept", "application/json");
+        request.setHeader("User-Agent", "Refine NER Extension");
         request.setEntity(body);
         return request;
     }
