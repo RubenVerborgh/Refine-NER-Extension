@@ -132,8 +132,6 @@ public abstract class NERServiceBase implements NERService {
         final HttpResponse response;
         try { response = httpClient.execute(request); }
         catch (IOException error) { throw new RuntimeException("Could not execute HTTP request", error); }
-        final Exception error = extractError(response);
-        if (error != null) throw error;
         return parseExtractionResponse(response);
     }
 
@@ -201,9 +199,11 @@ public abstract class NERServiceBase implements NERService {
      * Parses the named-entity recognition response
      * @param response A response of the named-entity extraction service
      * @return The extracted named entities
-     * @throws Exception if the response cannot be parsed
+     * @throws Exception if the extraction was not successful
      */
     protected NamedEntity[] parseExtractionResponse(final HttpResponse response) throws Exception {
+        final Exception error = extractError(response);
+        if (error != null) throw error;
         return parseExtractionResponse(new JSONObject((EntityUtils.toString(response.getEntity()))));
     }
     
@@ -211,9 +211,9 @@ public abstract class NERServiceBase implements NERService {
      * Parse the named-entity recognition response
      * @param response The response body
      * @return The extracted named entities
-     * @throws JSONException if the response cannot be parsed
+     * @throws Exception if the extraction was not successful
      */
-    protected NamedEntity[] parseExtractionResponse(final JSONObject response) throws JSONException {
+    protected NamedEntity[] parseExtractionResponse(final JSONObject response) throws Exception {
         return EMPTY_EXTRACTION_RESULT;
     }
     
