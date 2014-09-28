@@ -57,7 +57,7 @@ public class AlchemyAPI extends NERServiceBase {
         // Check response status
         final JSONObject response = (JSONObject)tokener.nextValue();
         if (!"OK".equals(response.getString("status")))
-            throw new IllegalArgumentException("The AlchemyAPI request did not succeed.");
+            throw new RuntimeException(response.optString("statusInfo", "Extraction failed"));
         
         // Find all entities
         final JSONArray entities = response.getJSONArray("entities");
