@@ -3,7 +3,6 @@ package org.freeyourmetadata.ner.services;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
@@ -19,8 +18,9 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
-import org.json.JSONTokener;
+import org.json.JSONObject;
 import org.json.JSONWriter;
 
 /**
@@ -134,9 +134,7 @@ public abstract class NERServiceBase implements NERService {
         catch (IOException error) { throw new RuntimeException("Could not execute HTTP request", error); }
         final Exception error = extractError(response);
         if (error != null) throw error;
-        
-        final HttpEntity responseEntity = response.getEntity();
-        return parseExtractionResponseEntity(responseEntity);
+        return parseExtractionResponse(response);
     }
 
     /**
@@ -200,23 +198,22 @@ public abstract class NERServiceBase implements NERService {
     protected void writeExtractionRequestBody(final String text, final JSONWriter body) throws JSONException { }
     
     /**
-     * Parses the entity of the named-entity recognition response
+     * Parses the named-entity recognition response
      * @param response A response of the named-entity extraction service
      * @return The extracted named entities
      * @throws Exception if the response cannot be parsed
      */
-    protected NamedEntity[] parseExtractionResponseEntity(HttpEntity response) throws Exception {
-        final InputStreamReader responseReader = new InputStreamReader(response.getContent());
-        return parseExtractionResponseEntity(new JSONTokener(responseReader));
+    protected NamedEntity[] parseExtractionResponse(final HttpResponse response) throws Exception {
+        return parseExtractionResponse(new JSONObject((EntityUtils.toString(response.getEntity()))));
     }
     
     /**
-     * Parses the JSON entity of the named-entity recognition response
-     * @param tokener The tokener containing the response
+     * Parse the named-entity recognition response
+     * @param response The response body
      * @return The extracted named entities
      * @throws JSONException if the response cannot be parsed
      */
-    protected NamedEntity[] parseExtractionResponseEntity(final JSONTokener tokener) throws JSONException {
+    protected NamedEntity[] parseExtractionResponse(final JSONObject response) throws JSONException {
         return EMPTY_EXTRACTION_RESULT;
     }
     
@@ -242,7 +239,7 @@ public abstract class NERServiceBase implements NERService {
     protected Exception extractError(final HttpResponse response) throws Exception {
         if (response.getStatusLine().getStatusCode() < 300) return null;
         try {
-            return extractError(new JSONTokener(new InputStreamReader(response.getEntity().getContent())));
+            return extractError(new JSONObject((EntityUtils.toString(response.getEntity()))));
         }
         catch (Exception error) {
         	return new Exception(String.format("HTTP error %d", response.getStatusLine().getStatusCode()));
@@ -251,10 +248,10 @@ public abstract class NERServiceBase implements NERService {
     
     /**
      * Extracts a possible error from the HTTP response body
-     * @param tokener The tokener containing the response
+     * @param response The response body
      * @return The extracted error, or <tt>null</tt> if none exists
      */
-    protected Exception extractError(final JSONTokener tokener) throws JSONException {
+    protected Exception extractError(final JSONObject response) throws JSONException {
     	throw new UnsupportedOperationException();
     }
 }

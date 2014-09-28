@@ -11,7 +11,6 @@ import org.apache.http.entity.InputStreamEntity;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONTokener;
 
 import com.google.common.base.Charsets;
 
@@ -49,8 +48,8 @@ public class DummyNER extends NERServiceBase {
     
     /** {@inheritDoc} */
     @Override
-    protected NamedEntity[] parseExtractionResponseEntity(final JSONTokener tokener) throws JSONException {
-        final JSONArray resultsJson = (JSONArray)tokener.nextValue();
+    protected NamedEntity[] parseExtractionResponse(final JSONObject response) throws JSONException {
+        final JSONArray resultsJson = response.getJSONArray("entities");
         final NamedEntity[] results = new NamedEntity[resultsJson.length()];
         for (int i = 0; i < results.length; i++)
             results[i] = new NamedEntity(resultsJson.getString(i));
@@ -59,8 +58,7 @@ public class DummyNER extends NERServiceBase {
     
     /** {@inheritDoc} */
     @Override
-    protected Exception extractError(final JSONTokener tokener) throws JSONException {
-    	final JSONObject response = (JSONObject)tokener.nextValue();
+    protected Exception extractError(final JSONObject response) throws JSONException {
     	return new Exception(response.getString("message"));
     }
 }

@@ -7,11 +7,12 @@ import java.net.URI;
 import java.util.Map;
 
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.util.EntityUtils;
 import org.freeyourmetadata.util.ParameterList;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONTokener;
 
 /**
  * WikiMeta service connector
@@ -59,13 +60,26 @@ public class WikiMeta extends NERServiceBase {
         return parameters.toEntity();
     }
     
+    /**
+     * Parses the named-entity recognition response
+     * @param response A response of the named-entity extraction service
+     * @return The extracted named entities
+     * @throws Exception if the response cannot be parsed
+     */
+    protected NamedEntity[] parseExtractionResponse(final HttpResponse response) throws Exception {
+    	final String body = EntityUtils.toString(response.getEntity());
+    	
+    	// An invalid response is recognized by invalid JSON
+    	final JSONObject bodyJson;
+    	try { bodyJson = new JSONObject(body); }
+    	catch (JSONException error) { throw new Exception(body); }
+    	
+        return parseExtractionResponse(bodyJson);
+    }
+    
     /** {@inheritDoc} */
     @Override
-    protected NamedEntity[] parseExtractionResponseEntity(final JSONTokener tokener) throws JSONException {
-        // An invalid response (e.g., above limit) is recognized by invalid JSON
-    	final JSONObject response;
-    	try { response = (JSONObject)tokener.nextValue(); }
-    	catch (JSONException e) { throw new IllegalArgumentException("The WikiMetaAPI request did not succeed."); }
+    protected NamedEntity[] parseExtractionResponse(final JSONObject response) throws JSONException {
         final JSONArray document = response.getJSONArray("document");
         
         // Find all entities

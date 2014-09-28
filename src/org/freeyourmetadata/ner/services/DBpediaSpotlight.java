@@ -11,7 +11,6 @@ import org.freeyourmetadata.util.ParameterList;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONTokener;
 
 /**
  * DBpedia spotlight service connector
@@ -43,8 +42,7 @@ public class DBpediaSpotlight extends NERServiceBase implements NERService {
     
     /** {@inheritDoc} */
     @Override
-    protected NamedEntity[] parseExtractionResponseEntity(final JSONTokener tokener) throws JSONException {
-        final JSONObject response = (JSONObject)tokener.nextValue();
+    protected NamedEntity[] parseExtractionResponse(final JSONObject response) throws JSONException {
         // Empty result if no resources were found
         if (!response.has("Resources"))
             return EMPTY_EXTRACTION_RESULT;

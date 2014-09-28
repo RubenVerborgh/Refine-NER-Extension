@@ -12,7 +12,6 @@ import org.freeyourmetadata.util.ParameterList;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONTokener;
 
 /**
  * dataTXT service connector
@@ -58,9 +57,8 @@ public class DataTXT extends NERServiceBase {
 
     /** {@inheritDoc} */
     @Override
-    protected NamedEntity[] parseExtractionResponseEntity(final JSONTokener tokener) throws JSONException {
+    protected NamedEntity[] parseExtractionResponse(final JSONObject response) throws JSONException {
         // Check response status
-        final JSONObject response = (JSONObject)tokener.nextValue();
         if (!response.isNull("error"))
             throw new IllegalArgumentException("dataTXT request failed.");
         
@@ -82,8 +80,7 @@ public class DataTXT extends NERServiceBase {
 
     /** {@inheritDoc} */
     @Override
-    protected Exception extractError(final JSONTokener tokener) throws JSONException {
-    	final JSONObject response = (JSONObject)tokener.nextValue();
+    protected Exception extractError(final JSONObject response) throws JSONException {
     	return response.has("message") ? new Exception(response.getString("message")) : null;
     }
 }

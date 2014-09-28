@@ -12,7 +12,6 @@ import org.freeyourmetadata.util.ParameterList;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONTokener;
 
 /**
  * Zemanta service connector
@@ -50,9 +49,8 @@ public class Zemanta extends NERServiceBase {
     
     /** {@inheritDoc} */
     @Override
-    protected NamedEntity[] parseExtractionResponseEntity(final JSONTokener tokener) throws JSONException {
+    protected NamedEntity[] parseExtractionResponse(final JSONObject response) throws JSONException {
         // Check response status
-        final JSONObject response = (JSONObject)tokener.nextValue();
         if (!"ok".equals(response.getString("status")))
             throw new IllegalArgumentException("The Zemanta request did not succeed.");
         
