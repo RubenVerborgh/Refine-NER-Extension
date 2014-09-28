@@ -38,7 +38,7 @@ ConfigurationDialog.prototype = {
         // Add configuration instructions
         if (service.documentation)
           $title.append(' ', $('<a/>', { 'class': 'documentation',
-                                         text: 'configuration instructions',
+                                         text: 'get a free API key',
                                          href: service.documentation,
                                          target: '_blank' }));
         // Add the service to the list
