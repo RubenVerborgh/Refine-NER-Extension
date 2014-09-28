@@ -129,6 +129,9 @@ public abstract class NERServiceBase implements NERService {
      */
     protected NamedEntity[] performExtractionRequest(final HttpUriRequest request) throws Exception {
         final DefaultHttpClient httpClient = new DefaultHttpClient();
+        final HttpResponse response;
+        try { response = httpClient.execute(request); }
+        catch (IOException error) { throw new RuntimeException("Could not execute HTTP request", error); }
         final Exception error = extractError(response);
         if (error != null) throw error;
         
