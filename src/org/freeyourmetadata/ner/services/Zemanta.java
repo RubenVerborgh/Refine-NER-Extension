@@ -51,8 +51,9 @@ public class Zemanta extends NERServiceBase {
     @Override
     protected NamedEntity[] parseExtractionResponse(final JSONObject response) throws JSONException {
         // Check response status
-        if (!"ok".equals(response.getString("status")))
-            throw new IllegalArgumentException("The Zemanta request did not succeed.");
+    	final String status = response.getString("status");
+        if (!"ok".equals(status))
+            throw new RuntimeException(status);
         
         // Get mark-up results
         final JSONObject markup = response.getJSONObject("markup");
@@ -73,5 +74,11 @@ public class Zemanta extends NERServiceBase {
             results.add(new NamedEntity(label, disambiguations));
         }
         return results.toArray(new NamedEntity[results.size()]);
+    }
+    
+    /** {@inheritDoc} */
+    @Override
+    protected Exception extractError(final String response) throws Exception {
+        return new Exception(response);
     }
 }

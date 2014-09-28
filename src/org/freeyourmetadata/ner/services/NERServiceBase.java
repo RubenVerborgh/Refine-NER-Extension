@@ -239,11 +239,20 @@ public abstract class NERServiceBase implements NERService {
     protected Exception extractError(final HttpResponse response) throws Exception {
         if (response.getStatusLine().getStatusCode() < 300) return null;
         try {
-            return extractError(new JSONObject((EntityUtils.toString(response.getEntity()))));
+            return extractError((EntityUtils.toString(response.getEntity())));
         }
         catch (Exception error) {
         	return new Exception(String.format("HTTP error %d", response.getStatusLine().getStatusCode()));
         }
+    }
+    
+    /**
+     * Extracts a possible error from the HTTP response
+     * @param response The response body
+     * @return The extracted error, or <tt>null</tt> if none exists
+     */
+    protected Exception extractError(final String response) throws Exception {
+        return extractError(new JSONObject(response));
     }
     
     /**
