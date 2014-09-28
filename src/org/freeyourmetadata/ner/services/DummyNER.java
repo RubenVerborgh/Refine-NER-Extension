@@ -10,6 +10,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.entity.InputStreamEntity;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.json.JSONTokener;
 
 import com.google.common.base.Charsets;
@@ -54,5 +55,12 @@ public class DummyNER extends NERServiceBase {
         for (int i = 0; i < results.length; i++)
             results[i] = new NamedEntity(resultsJson.getString(i));
         return results;
+    }
+    
+    /** {@inheritDoc} */
+    @Override
+    protected Exception extractError(final JSONTokener tokener) throws JSONException {
+    	final JSONObject response = (JSONObject)tokener.nextValue();
+    	return new Exception(response.getString("message"));
     }
 }
