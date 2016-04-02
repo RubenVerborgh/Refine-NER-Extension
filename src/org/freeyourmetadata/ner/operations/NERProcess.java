@@ -89,6 +89,7 @@ public class NERProcess extends LongRunningProcess implements Runnable {
         
         // Go through each row and extract entities if the row is part of the filter
         final ExtractionResult[][] extractionResults = new ExtractionResult[rowsTotal][];
+        final ExtractionResult[] emptyResult = new ExtractionResult[0];
         int rowsProcessed = 0;
         for (int rowIndex = 0; rowIndex < rowsTotal; rowIndex++) {
             // If the row is part of the filter, extract entities
@@ -102,9 +103,12 @@ public class NERProcess extends LongRunningProcess implements Runnable {
                 // Perform extraction if the text is not empty
                 LOGGER.info(String.format("Extracting named entities in column %s on row %d of %d.",
       				  column.getName(), rowsProcessed + 1, rowsFiltered));
-                extractionResults[rowIndex] = text.isEmpty() ? new ExtractionResult[0] : performExtraction(text);
+                extractionResults[rowIndex] = text.isEmpty() ? emptyResult : performExtraction(text);
                 
                 _progress = 100 * ++rowsProcessed / rowsFiltered;
+            }
+            else {
+            	extractionResults[rowIndex] = emptyResult;
             }
             // Exit directly if the process has been cancelled
             if (_canceled)
