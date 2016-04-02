@@ -58,7 +58,7 @@ public class DummyNER extends NERServiceBase {
     
     /** {@inheritDoc} */
     @Override
-    protected Exception extractError(final JSONObject response) throws JSONException {
+    protected Exception parseErrorResponse(final JSONObject response) throws JSONException {
     	return new Exception(response.getString("message"));
     }
 }

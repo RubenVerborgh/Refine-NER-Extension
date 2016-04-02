@@ -202,7 +202,7 @@ public abstract class NERServiceBase implements NERService {
      * @throws Exception if the extraction was not successful
      */
     protected NamedEntity[] parseExtractionResponse(final HttpResponse response) throws Exception {
-        final Exception error = extractError(response);
+        final Exception error = parseErrorResponse(response);
         if (error != null) throw error;
         return parseExtractionResponse(new JSONObject((EntityUtils.toString(response.getEntity()))));
     }
@@ -232,14 +232,14 @@ public abstract class NERServiceBase implements NERService {
     }
     
     /**
-     * Extracts a possible error from the HTTP response
+     * Parses a possible error in the HTTP response
      * @param response The response
      * @return The extracted error, or <tt>null</tt> if none exists
      */
-    protected Exception extractError(final HttpResponse response) throws Exception {
+    protected Exception parseErrorResponse(final HttpResponse response) throws Exception {
         if (response.getStatusLine().getStatusCode() < 300) return null;
         try {
-            return extractError((EntityUtils.toString(response.getEntity())));
+            return parseErrorResponse((EntityUtils.toString(response.getEntity())));
         }
         catch (Exception error) {
         	return new Exception(String.format("HTTP error %d", response.getStatusLine().getStatusCode()));
@@ -247,20 +247,20 @@ public abstract class NERServiceBase implements NERService {
     }
     
     /**
-     * Extracts a possible error from the HTTP response
+     * Parses a possible error in the HTTP response
      * @param response The response body
      * @return The extracted error, or <tt>null</tt> if none exists
      */
-    protected Exception extractError(final String response) throws Exception {
-        return extractError(new JSONObject(response));
+    protected Exception parseErrorResponse(final String response) throws Exception {
+        return parseErrorResponse(new JSONObject(response));
     }
     
     /**
-     * Extracts a possible error from the HTTP response body
+     * Parses a possible error in the HTTP response
      * @param response The response body
      * @return The extracted error, or <tt>null</tt> if none exists
      */
-    protected Exception extractError(final JSONObject response) throws JSONException {
+    protected Exception parseErrorResponse(final JSONObject response) throws JSONException {
     	throw new UnsupportedOperationException();
     }
 }

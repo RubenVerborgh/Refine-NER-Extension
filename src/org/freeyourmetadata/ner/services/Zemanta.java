@@ -78,7 +78,7 @@ public class Zemanta extends NERServiceBase {
     
     /** {@inheritDoc} */
     @Override
-    protected Exception extractError(final String response) throws Exception {
+    protected Exception parseErrorResponse(final String response) throws Exception {
         return new Exception(response);
     }
 }
