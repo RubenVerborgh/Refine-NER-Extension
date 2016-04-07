@@ -26,5 +26,6 @@ This extension is provided free of charge under the MIT license.
 
 If this extension is used for research, we kindly ask that you refer to the associated paper in your publications:
 <br>
-*van Hooland, S., De Wilde, M., Verborgh, R., Steiner, T., and Van de Walle, R.
-[Exploring Entity Recognition and Disambiguation for Cultural Heritage Collections](http://freeyourmetadata.org/publications/named-entity-recognition-abstract.pdf) (To appear in _Literary and Linguistics Computing_, 2014)*
+van Hooland, S., De Wilde, M., Verborgh, R., Steiner, T., and Van de Walle, R.
+[Exploring Entity Recognition and Disambiguation for Cultural Heritage Collections](http://freeyourmetadata.org/publications/named-entity-recognition-abstract.pdf).
+Digital Scholarship in the Humanities, Vol. 30 Iss. 2, pp. 262–279, 2015.
