@@ -17,7 +17,7 @@ import org.json.JSONObject;
  * @author Ruben Verborgh
  */
 public class DBpediaSpotlight extends NERServiceBase implements NERService {
-    private final static URI SERVICEBASEURL = createUri("http://spotlight.sztaki.hu:2222/rest/annotate");
+    private final static URI SERVICEBASEURL = createUri("http://model.dbpedia-spotlight.org/en/annotate");
     private final static String[] SERVICESETTINGS = {};
     private final static String[] EXTRACTIONSETTINGS = { "Confidence", "Support" };
 
